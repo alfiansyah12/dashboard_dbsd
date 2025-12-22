@@ -54,18 +54,24 @@ $route['login'] = 'auth';
 
 $route['admin']  = 'admin/index';
 
+/** PEGAWAI **/
 $route['pegawai'] = 'pegawai/index';
 $route['pegawai/pilih_tugas'] = 'pegawai/pilih_tugas';
 $route['pegawai/ambil_tugas'] = 'pegawai/ambil_tugas';
-$route['pegawai/dashboard'] = 'pegawai/dashboard_list';
-$route['pegawai/dashboard/(:num)'] = 'pegawai/dashboard/$1';
+
+$route['pegawai/dashboard'] = 'pegawai/dashboard_list';      // LIST semua input
+$route['pegawai/input/(:num)'] = 'pegawai/dashboard/$1';     // FORM input (pakai alias input)
+$route['pegawai/dashboard/(:num)'] = 'pegawai/dashboard/$1'; // optional: biar tetap bisa akses lewat /dashboard/{id}
 $route['pegawai/dashboard_store'] = 'pegawai/dashboard_store';
-$route['pegawai/input/(:num)'] = 'pegawai/dashboard/$1';
 
-
+/** ATASAN **/
 $route['atasan'] = 'atasan/index';
 $route['atasan/review_store'] = 'atasan/review_store';
-$route['atasan/chart'] = 'atasan/chart';
+$route['atasan/target_store'] = 'atasan/target_store';
+$route['atasan/terminate/(:num)'] = 'atasan/terminate/$1';
+
+// $route['atasan/chart'] = 'atasan/chart'; // hapus kalau chart sudah 1 halaman di output
 
 $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;
+

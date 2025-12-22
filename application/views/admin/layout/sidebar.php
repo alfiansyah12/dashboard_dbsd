@@ -11,13 +11,13 @@
                 <a href="<?= base_url('index.php/admin'); ?>" class="nav-link text-white">Dashboard</a>
             </li>
             <li class="nav-item">
-                <a href="<?= base_url('index.php/admin/user'); ?>" class="nav-link text-white">Kelola User</a>
+                <a href="<?= base_url('index.php/admin/user'); ?>" class="nav-link text-white">Manage User</a>
             </li>
             <li class="nav-item">
-                <a href="<?= base_url('index.php/admin/divisi'); ?>" class="nav-link text-white">Kelola Divisi</a>
+                <a href="<?= base_url('index.php/admin/divisi'); ?>" class="nav-link text-white">Manage Division</a>
             </li>
             <li class="nav-item">
-                <a href="<?= base_url('index.php/admin/tugas'); ?>" class="nav-link text-white">Kelola Tugas</a>
+                <a href="<?= base_url('index.php/admin/tugas'); ?>" class="nav-link text-white">Manage Task</a>
             </li>
             <li class="nav-item mt-3">
                 <a href="<?= base_url('index.php/auth/logout'); ?>" class="nav-link text-danger">Logout</a>

@@ -6,7 +6,7 @@
             <form method="post" action="<?= base_url('index.php/admin/tugas_store') ?>">
                 <div class="row">
                     <div class="col-md-3">
-                        <input type="text" name="nama_tugas" class="form-control" placeholder="Nama Tugas" required>
+                        <input type="text" name="nama_tugas" class="form-control" placeholder="Name Task" required>
                     </div>
                     <div class="col-md-3">
                         <select name="divisi_id" class="form-control" required>
@@ -17,7 +17,7 @@
                         </select>
                     </div>
                     <div class="col-md-4">
-                        <input type="text" name="deskripsi" class="form-control" placeholder="Deskripsi">
+                        <input type="text" name="deskripsi" class="form-control" placeholder="Description">
                     </div>
                     <div class="col-md-2">
                         <button class="btn btn-primary">Add</button>
