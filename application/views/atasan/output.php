@@ -20,6 +20,67 @@
     </a>
   </div>
 
+<!-- =========================
+     CHART MONITORING
+     ========================= -->
+<div id="chart" class="mb-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">📊 Chart Monitoring</h4>
+  </div>
+
+  <div class="row">
+  <div class="row chart-wrap">
+  <div class="col-md-6 mb-3">
+    <div class="card chart-card">
+      <div class="card-header">Superior Assessment</div>
+      <div class="card-body">
+        <canvas id="pieReview" class="chart-canvas"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-6 mb-3">
+    <div class="card chart-card">
+      <div class="card-header">Official Duty Task Status</div>
+      <div class="card-body">
+        <canvas id="barStatus" class="chart-canvas"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<style>
+  /* area chart lebih hemat space */
+  .chart-wrap{ margin-bottom: 16px; }
+
+  /* card chart fix tinggi */
+  .chart-card{
+    height: 350px;              /* <-- kecilin di sini */
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .chart-card .card-header{
+    padding: .4rem .75rem;
+    font-weight: 600;
+    background: #fff;
+  }
+  .chart-card .card-body{
+    padding: .5rem;
+    height: calc(260px - 44px); /* header kira2 44px */
+  }
+
+  /* canvas wajib ikut tinggi card */
+  .chart-canvas{
+    width: 100% !important;
+    height: 100% !important;
+    display: block;
+  }
+</style>
+
+
+
   <!-- FILTER DIVISI -->
   <form class="form-inline mb-3" method="get" action="<?= base_url('index.php/atasan') ?>">
     <label class="mr-2">Filter Division:</label>
@@ -277,36 +338,6 @@
       <?php endforeach; endif; ?>
     </tbody>
   </table>
-
-  <!-- =========================
-       CHART
-       ========================= -->
-  <hr class="mt-4 mb-4">
-  <div id="chart" class="d-flex justify-content-between align-items-center mb-2">
-    <h4 class="mb-0">Chart Monitoring</h4>
-  </div>
-
-  <div class="row">
-    <div class="col-md-6 mb-3">
-      <div class="card">
-        <div class="card-header">Pie Chart - Superior Assessment</div>
-        <div class="card-body">
-          <canvas id="pieReview" height="160"></canvas>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-md-6 mb-3">
-      <div class="card">
-        <div class="card-header">Bar Chart - Official Duty Task</div>
-        <div class="card-body">
-          <canvas id="barStatus" height="160"></canvas>
-        </div>
-      </div>
-    </div>
-  </div>
-
-</div>
 
 <script>
 /* ====== UX tombol Save assessment ====== */

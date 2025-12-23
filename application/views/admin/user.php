@@ -17,8 +17,8 @@
                     <div class="col-md-2">
                         <select name="role" class="form-control" required>
                             <option value="">Role</option>
-                            <option value="pegawai">Employee</option>
-                            <option value="atasan">Superrior</option>
+                            <option value="pegawai">Pegawai</option>
+                            <option value="atasan">Atasan</option>
                             <option value="admin">Admin</option>
                         </select>
                     </div>

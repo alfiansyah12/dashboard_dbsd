@@ -1,34 +1,41 @@
 <div class="container-fluid">
   <div class="row">
 
-    <div class="col-md-2 sidebar p-0">
-      <div class="p-3 font-weight-bold">EMPLOYEE</div>
+    <!-- SIDEBAR -->
+    <nav class="col-md-2 d-md-block sidebar collapse" id="sidebarMenu">
+      <div class="pt-3 px-2">
 
-      <?php
-        $seg1 = $this->uri->segment(1);
-        $seg2 = $this->uri->segment(2);
+        <div class="text-white text-center font-weight-bold mb-3">
+          EMPLOYEE
+        </div>
 
-        $isDashboard = ($seg1 === 'pegawai' && $seg2 === 'dashboard');
-        $isPilihTugas = ($seg1 === 'pegawai' && $seg2 === 'pilih_tugas');
-      ?>
+        <ul class="nav flex-column">
 
-      <a class="<?= ($isDashboard ? 'active' : '') ?>"
-         href="<?= base_url('index.php/pegawai/dashboard') ?>">
-        Dashboard
-      </a>
+          <li class="nav-item">
+            <a class="nav-link <?= ($this->uri->segment(2) == 'dashboard' ? 'active' : '') ?>"
+               href="<?= base_url('index.php/pegawai/dashboard') ?>">
+              Dashboard
+            </a>
+          </li>
 
-      <!-- ⛔ HANYA TAMPIL JIKA TIDAK ADA TUGAS AKTIF -->
-      <?php if (empty($has_active_task)): ?>
-        <a class="<?= ($isPilihTugas ? 'active' : '') ?>"
-           href="<?= base_url('index.php/pegawai/pilih_tugas') ?>">
-          Choose Your Task
-        </a>
-      <?php endif; ?>
+          <li class="nav-item">
+            <a class="nav-link <?= ($this->uri->segment(2) == 'pilih_tugas' ? 'active' : '') ?>"
+               href="<?= base_url('index.php/pegawai/pilih_tugas') ?>">
+              Choose Task
+            </a>
+          </li>
 
-      <a href="<?= base_url('index.php/auth/logout') ?>"
-         onclick="return confirm('Yakin ingin logout?')">
-        Logout
-      </a>
-    </div>
+          <li class="nav-item mt-3">
+            <a class="nav-link text-danger"
+               href="<?= base_url('index.php/auth/logout') ?>"
+               onclick="return confirm('Yakin ingin logout?')">
+              Logout
+            </a>
+          </li>
 
-    <div class="col-md-10 pt-4">
+        </ul>
+      </div>
+    </nav>
+
+    <!-- CONTENT -->
+    <main class="col-md-10 ml-sm-auto px-4 pt-4">

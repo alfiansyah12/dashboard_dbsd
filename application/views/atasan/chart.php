@@ -68,14 +68,22 @@ new Chart(document.getElementById('barStatus'), {
   data: {
     labels: statusLabels,
     datasets: [{
-      label: 'Jumlah',     // <-- tambah ini biar tidak "undefined"
+      label: 'Jumlah',
       data: statusValues
     }]
   },
   options: {
-    scales: { y: { beginAtZero: true, precision: 0 } }
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      y: {
+        beginAtZero: true,
+        precision: 0
+      }
+    }
   }
 });
+
 
 </script>
 </body>
