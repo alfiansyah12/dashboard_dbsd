@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 22, 2025 at 01:54 AM
+-- Generation Time: Dec 24, 2025 at 08:14 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.0.30
 
@@ -40,17 +40,9 @@ CREATE TABLE `atasan_review` (
 --
 
 INSERT INTO `atasan_review` (`id`, `pegawai_tugas_id`, `review_status`, `review_by`, `review_at`) VALUES
-(1, 1, 'not_yet', 4, '2025-12-18 11:18:35'),
-(2, 2, 'not_yet', 4, '2025-12-18 11:47:14'),
-(3, 3, 'done', 4, '2025-12-18 11:47:18'),
-(4, 5, 'not_yet', 4, '2025-12-18 22:16:39'),
-(5, 4, 'not_yet', 4, '2025-12-18 11:53:32'),
-(6, 6, 'done', 4, '2025-12-18 22:16:08'),
-(7, 8, 'done', 4, '2025-12-21 11:30:16'),
-(8, 9, 'not_yet', 4, '2025-12-21 18:22:56'),
-(9, 10, 'not_yet', 4, '2025-12-21 18:22:59'),
-(10, 11, 'done', 4, '2025-12-22 00:47:58'),
-(11, 12, 'done', 4, '2025-12-22 00:49:32');
+(12, 15, 'not_yet', 14, '2025-12-23 06:06:31'),
+(13, 14, 'done', 14, '2025-12-24 00:38:48'),
+(14, 13, 'done', 14, '2025-12-24 00:38:32');
 
 -- --------------------------------------------------------
 
@@ -62,8 +54,10 @@ CREATE TABLE `atasan_target` (
   `id` int(11) NOT NULL,
   `divisi_id` int(11) DEFAULT NULL,
   `periode` date NOT NULL,
-  `target` int(11) NOT NULL DEFAULT 0,
-  `realisasi` int(11) NOT NULL DEFAULT 0,
+  `target` decimal(18,2) NOT NULL DEFAULT 0.00,
+  `realisasi` decimal(18,2) NOT NULL DEFAULT 0.00,
+  `fee_base_income` decimal(18,2) DEFAULT NULL,
+  `volume_of_agent` decimal(18,2) DEFAULT NULL,
   `catatan` varchar(255) DEFAULT NULL,
   `created_by` int(11) DEFAULT NULL,
   `created_at` datetime DEFAULT NULL,
@@ -74,8 +68,10 @@ CREATE TABLE `atasan_target` (
 -- Dumping data for table `atasan_target`
 --
 
-INSERT INTO `atasan_target` (`id`, `divisi_id`, `periode`, `target`, `realisasi`, `catatan`, `created_by`, `created_at`, `updated_at`) VALUES
-(2, NULL, '2025-11-01', 100000, 75000, 'asdasd', 4, '2025-12-22 07:45:01', '2025-12-22 07:45:01');
+INSERT INTO `atasan_target` (`id`, `divisi_id`, `periode`, `target`, `realisasi`, `fee_base_income`, `volume_of_agent`, `catatan`, `created_by`, `created_at`, `updated_at`) VALUES
+(12, NULL, '2025-01-01', 1000.00, 2000.00, 12000.00, 13000.00, '', 1, '2025-12-23 11:14:29', '2025-12-23 14:21:02'),
+(14, NULL, '2025-02-01', 1200.00, 2100.00, 12000.00, 14000.00, '', 1, '2025-12-23 14:21:29', '2025-12-23 14:23:11'),
+(18, NULL, '2025-03-01', 1400.00, 2500.00, 13000.00, 15000.00, '', 1, '2025-12-23 14:23:30', '2025-12-23 14:23:30');
 
 -- --------------------------------------------------------
 
@@ -98,11 +94,9 @@ CREATE TABLE `dashboard_input` (
 --
 
 INSERT INTO `dashboard_input` (`id`, `pegawai_tugas_id`, `activity`, `pending_matters`, `close_the_path`, `updated_at`, `created_at`) VALUES
-(8, 8, 'zxczxc', 'zxczxc', 'zxczcx', '2025-12-22 01:22:24', '2025-12-21 23:55:09'),
-(9, 9, 'iiiiiiiiiiiiii', 'iiiiiiiiiiiiiiii', 'iiiiiiiiiiiiiiiiiii', '2025-12-22 01:22:21', '2025-12-21 23:58:34'),
-(10, 10, 'zxczxc', 'zxzx', 'zxzx', '2025-12-22 01:22:17', '2025-12-22 01:09:14'),
-(11, 11, 'asdasda', 'sdasd', 'asdasd', '2025-12-22 07:45:54', '2025-12-22 07:45:54'),
-(12, 12, 'zxczxczxc', 'zxczxczc', 'zxczxczxc', '2025-12-22 07:49:23', '2025-12-22 07:49:23');
+(13, 13, 'qwert123', 'asdf123123', 'qwer123123', '2025-12-23 13:03:58', '2025-12-23 13:03:31'),
+(14, 14, 'qweqw123', 'qeqweasdad123', 'zxczxcz123', '2025-12-23 13:05:31', '2025-12-23 13:05:31'),
+(15, 15, 'zxczxc', 'czasdasd', 'asdasdasd', '2025-12-23 13:06:18', '2025-12-23 13:06:18');
 
 -- --------------------------------------------------------
 
@@ -144,8 +138,9 @@ CREATE TABLE `goals` (
 --
 
 INSERT INTO `goals` (`id`, `pegawai_tugas_id`, `goals`, `created_at`, `updated_at`) VALUES
-(1, 11, 'asdasd', '2025-12-22 07:45:54', '2025-12-22 07:45:54'),
-(2, 12, 'zxczxc', '2025-12-22 07:49:23', '2025-12-22 07:49:23');
+(3, 13, 'proses', '2025-12-23 13:03:31', '2025-12-23 13:03:58'),
+(4, 14, 'berhasil', '2025-12-23 13:05:31', '2025-12-23 13:05:31'),
+(5, 15, 'sadsd', '2025-12-23 13:06:18', '2025-12-23 13:06:18');
 
 -- --------------------------------------------------------
 
@@ -167,18 +162,9 @@ CREATE TABLE `pegawai_tugas` (
 --
 
 INSERT INTO `pegawai_tugas` (`id`, `user_id`, `tugas_id`, `tanggal_ambil`, `status`, `created_at`) VALUES
-(1, 3, 2, '2025-12-18', 'done', '2025-12-18 09:24:58'),
-(2, 3, 2, '2025-12-18', 'terminated', '2025-12-18 11:21:58'),
-(3, 3, 4, '2025-12-18', 'done', '2025-12-18 11:43:28'),
-(4, 5, 3, '2025-12-18', 'done', '2025-12-18 11:50:17'),
-(5, 5, 3, '2025-12-18', 'done', '2025-12-18 11:52:50'),
-(6, 3, 4, '2025-12-19', 'done', '2025-12-18 18:44:10'),
-(7, 5, 5, '2025-12-19', 'on going', '2025-12-18 22:17:47'),
-(8, 3, 6, '2025-12-21', 'terminated', '2025-12-21 10:55:00'),
-(9, 3, 6, '2025-12-21', 'terminated', '2025-12-21 10:58:29'),
-(10, 3, 6, '2025-12-22', 'terminated', '2025-12-21 18:09:06'),
-(11, 3, 6, '2025-12-22', 'terminated', '2025-12-22 00:45:49'),
-(12, 3, 6, '2025-12-22', 'on going', '2025-12-22 00:49:14');
+(13, 15, 6, '2025-12-23', 'on going', '2025-12-23 06:03:16'),
+(14, 16, 6, '2025-12-23', 'done', '2025-12-23 06:05:15'),
+(15, 17, 6, '2025-12-23', 'terminated', '2025-12-23 06:06:12');
 
 -- --------------------------------------------------------
 
@@ -213,6 +199,7 @@ CREATE TABLE `users` (
   `nama` varchar(100) DEFAULT NULL,
   `email` varchar(100) DEFAULT NULL,
   `password` varchar(255) DEFAULT NULL,
+  `reset_at` datetime DEFAULT NULL,
   `role` enum('admin','atasan','pegawai') DEFAULT NULL,
   `divisi_id` int(11) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
@@ -222,10 +209,12 @@ CREATE TABLE `users` (
 -- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`id`, `nama`, `email`, `password`, `role`, `divisi_id`, `created_at`) VALUES
-(1, 'Admin', 'admin@admin.com', '$2y$10$YDF0VlJ4oShf.KkKtAlxm.KmtPZbrcV1/pV4i05UweSmNBn1kXN2m', 'admin', NULL, '2025-12-18 07:45:23'),
-(3, 'Gaspar Ferdiansyah', 'gaspar.ferdiansyah@gmail.com', '$2y$10$Fdeda47sBb8e4i2E/.N5Q.M..wC..FZ7ohX3f3yH74SPwu9WIm3/y', 'pegawai', 4, '2025-12-18 08:54:19'),
-(4, 'atasan', 'atasan@gmail.com', '$2y$10$/H5PUm979PzxvztY6KRMrOTxj/Udg54Rour9AZu2Wf9c8SDz2u89a', 'atasan', NULL, '2025-12-18 16:44:11');
+INSERT INTO `users` (`id`, `nama`, `email`, `password`, `reset_at`, `role`, `divisi_id`, `created_at`) VALUES
+(1, 'Admin', 'admin@admin.com', '$2y$10$YDF0VlJ4oShf.KkKtAlxm.KmtPZbrcV1/pV4i05UweSmNBn1kXN2m', NULL, 'admin', NULL, '2025-12-18 07:45:23'),
+(14, 'atasan', 'atasan@gmail.com', '$2y$10$.AjWZjSGLoAnTFxkFTctu.1Cb1OeIVxOMTLtmQcnoMA2RQynJTNfi', '2025-12-24 05:44:59', 'atasan', NULL, '2025-12-23 02:02:46'),
+(15, 'Gaspar Ferdiansyah', 'gaspar.ferdiansyah@gmail.com', '$2y$10$S2aNZJZwfOj2LtjmdORhAOtslIGc1PdYxB/CxXF8I/grk3vpl23im', NULL, 'pegawai', 4, '2025-12-23 02:03:08'),
+(16, 'alfin', 'alfin@gmail.com', '$2y$10$1MTjF9LQoq2jeu0VF7K.D.WXp3OH2cIk2/XHhOE8aELvnJ2NcKJaK', NULL, 'pegawai', 4, '2025-12-23 06:04:52'),
+(17, 'marcel', 'marcel@gmail.com', '$2y$10$joPKwwfZxsUdCTsVi530IeFC.qIOovaHZ0PBahcku/p8MVqZvjTB.', NULL, 'pegawai', 4, '2025-12-23 06:05:49');
 
 --
 -- Indexes for dumped tables
@@ -244,6 +233,7 @@ ALTER TABLE `atasan_review`
 --
 ALTER TABLE `atasan_target`
   ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uniq_periode` (`periode`),
   ADD UNIQUE KEY `uniq_divisi_periode` (`divisi_id`,`periode`);
 
 --
@@ -294,19 +284,19 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `atasan_review`
 --
 ALTER TABLE `atasan_review`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT for table `atasan_target`
 --
 ALTER TABLE `atasan_target`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- AUTO_INCREMENT for table `dashboard_input`
 --
 ALTER TABLE `dashboard_input`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT for table `divisi`
@@ -318,13 +308,13 @@ ALTER TABLE `divisi`
 -- AUTO_INCREMENT for table `goals`
 --
 ALTER TABLE `goals`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `pegawai_tugas`
 --
 ALTER TABLE `pegawai_tugas`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT for table `tugas`
@@ -336,7 +326,7 @@ ALTER TABLE `tugas`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- Constraints for dumped tables

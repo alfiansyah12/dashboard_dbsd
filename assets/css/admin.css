@@ -437,4 +437,124 @@ body {
 	.app-sidebar-offcanvas .offcanvas-body {
 		overflow-y: auto;
 	}
+
+	/* ================================
+   PAGE: ATASAN (OUTPUT.PHP SUPPORT)
+   - chart-box
+   - KPI cards
+   - table sticky header
+================================ */
+
+	/* Chart container fixed height */
+	.chart-box {
+		height: 220px;
+		position: relative;
+	}
+	.chart-box canvas {
+		width: 100% !important;
+		height: 100% !important;
+		display: block;
+	}
+
+	/* KPI style (dipakai di output.php) */
+	.kpi.card {
+		border-radius: 14px;
+	}
+	.kpi .label {
+		font-size: 12px;
+		color: var(--btn-muted);
+		font-weight: 900;
+	}
+	.kpi .value {
+		font-size: 18px;
+		font-weight: 900;
+		color: var(--btn-text);
+	}
+
+	/* Section title helper */
+	.section-title {
+		font-weight: 900;
+	}
+
+	/* Table improvements */
+	.table-responsive {
+		border-radius: 14px; /* biar mengikuti card radius */
+	}
+	.table thead.table-light th {
+		background: #f8fafc !important;
+		border-bottom: 1px solid var(--btn-border);
+	}
+
+	/* Sticky header (biar enak scroll) */
+	.table thead th {
+		position: sticky;
+		top: 0;
+		z-index: 2;
+	}
+
+	/* Badge (lebih rapih / konsisten) */
+	.badge {
+		border-radius: 999px;
+		font-weight: 900;
+		letter-spacing: 0.2px;
+	}
+
+	/* Text nowrap helper */
+	.text-nowrap {
+		white-space: nowrap !important;
+	}
+
+	/* ================================
+   BOOTSTRAP 5 COMPAT FIXES
+================================ */
+
+	/* Kalau masih ada sisa class dari BS4 */
+	.thead-light {
+		/* fallback kalau ada view lama masih pakai thead-light */
+		background: #f8fafc;
+	}
+
+	/* Table align (lebih rapi) */
+	.table td,
+	.table th {
+		vertical-align: middle;
+	}
+
+	/* ================================
+   BUTTON VARIANTS (BIAR MATCH THEME)
+================================ */
+
+	/* Danger button biar lebih soft tapi tetap tegas */
+	.btn-danger {
+		font-weight: 900;
+		border-radius: 10px;
+	}
+
+	/* Outline danger lebih "admin" */
+	.btn-outline-danger {
+		font-weight: 900;
+		border-radius: 10px;
+	}
+
+	/* ================================
+   CARD HEADER ICON SUPPORT
+================================ */
+	.card-header i {
+		opacity: 0.9;
+	}
+
+	/* ================================
+   RESPONSIVE TABLE ACTIONS
+================================ */
+	@media (max-width: 768px) {
+		/* assessment cell lebih lega */
+		td[style*="min-width: 210px"] {
+			min-width: 260px !important;
+		}
+
+		/* chart lebih pendek di mobile */
+		.chart-box {
+			height: 200px;
+		}
+	}
 }

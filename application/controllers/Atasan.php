@@ -8,12 +8,14 @@ class Atasan extends MY_Controller
         parent::__construct();
         $this->require_role('atasan');
 
-        // pastikan model yang dipakai di file ini diload
         $this->load->model('Divisi_model');
         $this->load->model('Atasan_target_model');
         $this->load->model('Goals_model');
     }
 
+    /** =========================
+     *  HALAMAN UTAMA (output.php)
+     *  ========================= */
     public function index()
     {
         $filter_divisi_id = $this->input->get('divisi_id', true);
@@ -74,11 +76,11 @@ class Atasan extends MY_Controller
         $volSeries = [];
 
         foreach (($data['targets'] ?? []) as $t) {
-            $labels[]         = date('Y-m', strtotime($t->periode));
-            $targetSeries[]   = (int)$t->target;
-            $realisasiSeries[]= (int)$t->realisasi;
-            $feeSeries[]      = (int)($t->fee_base_income ?? 0);
-            $volSeries[]      = (int)($t->volume_of_agent ?? 0);
+            $labels[]          = date('Y-m', strtotime($t->periode));
+            $targetSeries[]    = (int)$t->target;
+            $realisasiSeries[] = (int)$t->realisasi;
+            $feeSeries[]       = (int)($t->fee_base_income ?? 0);
+            $volSeries[]       = (int)($t->volume_of_agent ?? 0);
         }
 
         $data['chart_labels']    = json_encode($labels);
@@ -91,6 +93,37 @@ class Atasan extends MY_Controller
         // GOALS TABLE
         // =======================
         $data['goals_rows'] = $this->Goals_model->getAllForAtasan($filter_divisi_id);
+
+        // =======================
+        // SUMMARY (untuk KPI di output.php)
+        // =======================
+        $sumTarget = 0; $sumRealisasi = 0; $sumFee = 0; $sumVol = 0;
+        foreach (($data['targets'] ?? []) as $t) {
+            $sumTarget    += (int)$t->target;
+            $sumRealisasi += (int)$t->realisasi;
+            $sumFee       += (int)($t->fee_base_income ?? 0);
+            $sumVol       += (int)($t->volume_of_agent ?? 0);
+        }
+        $data['sumTarget'] = $sumTarget;
+        $data['sumRealisasi'] = $sumRealisasi;
+        $data['sumFee'] = $sumFee;
+        $data['sumVol'] = $sumVol;
+        $data['avgProgress'] = ($sumTarget > 0) ? round(($sumRealisasi / $sumTarget) * 100, 2) : 0;
+
+        $this->load->view('atasan/output', $data);
+    }
+
+    /** =========================
+     *  HALAMAN CHART (chart.php)
+     *  ========================= */
+    public function chart()
+    {
+        $filter_divisi_id = $this->input->get('divisi_id', true);
+        $filter_divisi_id = ($filter_divisi_id !== null && $filter_divisi_id !== '') ? (int)$filter_divisi_id : null;
+
+        // dropdown filter
+        $data['divisi'] = $this->Divisi_model->getAll();
+        $data['filter_divisi_id'] = $filter_divisi_id;
 
         // =======================
         // CHART 1: Penilaian Atasan
@@ -150,7 +183,7 @@ class Atasan extends MY_Controller
         $data['statusLabels'] = json_encode($statusLabels);
         $data['statusValues'] = json_encode($statusValues);
 
-        $this->load->view('atasan/output', $data);
+        $this->load->view('atasan/chart', $data);
     }
 
     public function review_store()
@@ -182,7 +215,7 @@ class Atasan extends MY_Controller
 
         $url = 'atasan';
         if ($divisi_id !== null) $url .= '?divisi_id=' . $divisi_id;
-        $url .= '#chart';
+
 
         $this->session->set_flashdata('success', 'Assessment berhasil disimpan.');
         redirect($url);
@@ -197,10 +230,7 @@ class Atasan extends MY_Controller
         $realisasi         = (int)$this->input->post('realisasi', true);
         $catatan           = $this->input->post('catatan', true);
 
-        if (!$periode) {
-            redirect('atasan');
-            return;
-        }
+        if (!$periode) { redirect('atasan'); return; }
 
         $periodeDate = $periode . '-01';
         $divisi_id_db = ($divisi_id_input === '' ? null : (int)$divisi_id_input);
@@ -208,11 +238,8 @@ class Atasan extends MY_Controller
         // cek exists (handle NULL)
         $this->db->from('atasan_target');
         $this->db->where('periode', $periodeDate);
-        if ($divisi_id_db === null) {
-            $this->db->where('divisi_id IS NULL', null, false);
-        } else {
-            $this->db->where('divisi_id', $divisi_id_db);
-        }
+        if ($divisi_id_db === null) $this->db->where('divisi_id IS NULL', null, false);
+        else $this->db->where('divisi_id', $divisi_id_db);
         $exists = $this->db->get()->row();
 
         $now = date('Y-m-d H:i:s');
@@ -234,21 +261,17 @@ class Atasan extends MY_Controller
         if ($current_filter_id !== null && $current_filter_id !== '') {
             $url .= '?divisi_id=' . (int)$current_filter_id;
         }
-        $url .= '#target';
 
+        
         $this->session->set_flashdata('success', 'Target/Realisasi tersimpan.');
-        redirect($url);
+        redirect($url.'#target');
     }
 
     public function terminate($pegawai_tugas_id)
     {
         $pegawai_tugas_id = (int)$pegawai_tugas_id;
-        if (!$pegawai_tugas_id) {
-            redirect('atasan');
-            return;
-        }
+        if (!$pegawai_tugas_id) { redirect('atasan'); return; }
 
-        // biar balik ke filter divisi yang sama (kalau ada)
         $filter_divisi_id = $this->input->get('divisi_id', true);
         $filter_divisi_id = ($filter_divisi_id !== null && $filter_divisi_id !== '') ? (int)$filter_divisi_id : null;
 
