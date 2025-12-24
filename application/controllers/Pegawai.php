@@ -1,24 +1,17 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Pegawai extends CI_Controller {
-
+class Pegawai extends MY_Controller
+{
     public function __construct()
     {
         parent::__construct();
-        date_default_timezone_set('Asia/Jakarta'); // GMT+7
+        $this->require_role('pegawai');
 
-        $this->load->library('session');
-        $this->load->model('Tugas_model');
+        // load model yang dipakai di controller ini
         $this->load->model('Pegawai_tugas_model');
+        $this->load->model('Tugas_model');
         $this->load->model('Goals_model');
-
-        if (!$this->session->userdata('logged_in')) redirect('auth');
-        if ($this->session->userdata('role') != 'pegawai') show_error('Akses ditolak', 403);
-
-        if (!$this->session->userdata('divisi_id')) {
-            show_error('Divisi belum ditentukan. Hubungi admin.', 403);
-        }
     }
 
     private function hasActiveTask()
@@ -31,7 +24,10 @@ class Pegawai extends CI_Controller {
     public function index()
     {
         $active = $this->Pegawai_tugas_model->getActiveByUser((int)$this->session->userdata('user_id'));
-        if ($active) redirect('pegawai/dashboard/'.$active->id);
+        if ($active) {
+            redirect('pegawai/dashboard/' . $active->id);
+            return;
+        }
 
         redirect('pegawai/pilih_tugas');
     }
@@ -45,7 +41,7 @@ class Pegawai extends CI_Controller {
         $data['has_active_task'] = $this->hasActiveTask();
 
         $this->load->view('pegawai/layout/header', ['title' => 'Pilih Tugas']);
-        $this->load->view('pegawai/layout/sidebar', $data); // ✅ kirim data ke sidebar
+        $this->load->view('pegawai/layout/sidebar', $data);
         $this->load->view('pegawai/pilih_tugas', $data);
         $this->load->view('pegawai/layout/footer');
     }
@@ -53,10 +49,16 @@ class Pegawai extends CI_Controller {
     public function ambil_tugas()
     {
         $tugas_id = (int)$this->input->post('tugas_id', true);
-        if (!$tugas_id) redirect('pegawai/pilih_tugas');
+        if (!$tugas_id) {
+            redirect('pegawai/pilih_tugas');
+            return;
+        }
 
         $active = $this->Pegawai_tugas_model->getActiveByUser((int)$this->session->userdata('user_id'));
-        if ($active) redirect('pegawai/dashboard/'.$active->id);
+        if ($active) {
+            redirect('pegawai/dashboard/' . $active->id);
+            return;
+        }
 
         $this->db->insert('pegawai_tugas', [
             'user_id'       => (int)$this->session->userdata('user_id'),
@@ -66,13 +68,10 @@ class Pegawai extends CI_Controller {
             'created_at'    => date('Y-m-d H:i:s')
         ]);
 
-        $id = $this->db->insert_id();
-        redirect('pegawai/dashboard/'.$id);
+        $id = (int)$this->db->insert_id();
+        redirect('pegawai/dashboard/' . $id);
     }
 
-    // =============================
-    // FORM INPUT (pegawai/dashboard/{id})
-    // =============================
     public function dashboard($pegawai_tugas_id)
     {
         $pegawai_tugas_id = (int)$pegawai_tugas_id;
@@ -86,7 +85,6 @@ class Pegawai extends CI_Controller {
             'pegawai_tugas_id' => $pegawai_tugas_id
         ])->row();
 
-        // ✅ goals per tugas
         $goals = $this->Goals_model->getByPegawaiTugas($pegawai_tugas_id);
 
         $data = [];
@@ -96,7 +94,7 @@ class Pegawai extends CI_Controller {
         $data['has_active_task'] = $this->hasActiveTask();
 
         $this->load->view('pegawai/layout/header', ['title' => 'Input Aktivitas']);
-        $this->load->view('pegawai/layout/sidebar', $data); // ✅ kirim data ke sidebar
+        $this->load->view('pegawai/layout/sidebar', $data);
         $this->load->view('pegawai/dashboard_form', $data);
         $this->load->view('pegawai/layout/footer');
     }
@@ -108,7 +106,7 @@ class Pegawai extends CI_Controller {
 
         if (!$pegawai_tugas_id) {
             $this->session->set_flashdata('error', 'Pegawai tugas tidak valid.');
-            redirect('pegawai/dashboard');
+            redirect('pegawai/dashboard_list');
             return;
         }
 
@@ -119,9 +117,6 @@ class Pegawai extends CI_Controller {
 
         $now = date('Y-m-d H:i:s');
 
-        // =============================
-        // SIMPAN DASHBOARD INPUT
-        // =============================
         $payload = [
             'pegawai_tugas_id' => $pegawai_tugas_id,
             'activity'         => $this->input->post('activity', true),
@@ -138,29 +133,20 @@ class Pegawai extends CI_Controller {
             $this->db->insert('dashboard_input', $payload);
         }
 
-        // =============================
-        // SIMPAN GOALS (baru)
-        // =============================
         $goals_text = trim((string)$this->input->post('goals', true));
         if ($goals_text !== '') {
             $this->Goals_model->upsert($pegawai_tugas_id, $goals_text);
         }
 
-        // update status pegawai_tugas
-        $allowed = ['on going','done','terminated'];
+        $allowed = ['on going', 'done', 'terminated'];
         if (in_array($status, $allowed, true)) {
             $this->Pegawai_tugas_model->updateStatus($pegawai_tugas_id, $status);
         }
 
         $this->session->set_flashdata('success', 'Data berhasil tersimpan.');
-
-        // ✅ setelah save kembali ke LIST dashboard
-        redirect('pegawai/dashboard#top');
+        redirect('pegawai/dashboard_list#top');
     }
 
-    // =============================
-    // LIST DASHBOARD (pegawai/dashboard)
-    // =============================
     public function dashboard_list()
     {
         $user_id = (int)$this->session->userdata('user_id');
@@ -180,8 +166,6 @@ class Pegawai extends CI_Controller {
         $this->db->join('tugas t', 't.id = pt.tugas_id');
         $this->db->join('dashboard_input di', 'di.pegawai_tugas_id = pt.id', 'left');
         $this->db->where('pt.user_id', $user_id);
-
-        // paling baru muncul atas
         $this->db->order_by('COALESCE(di.updated_at, di.created_at, pt.created_at)', 'DESC', false);
 
         $data = [];
@@ -189,7 +173,7 @@ class Pegawai extends CI_Controller {
         $data['has_active_task'] = $this->hasActiveTask();
 
         $this->load->view('pegawai/layout/header', ['title' => 'Dashboard Pegawai']);
-        $this->load->view('pegawai/layout/sidebar', $data); // ✅ kirim data ke sidebar
+        $this->load->view('pegawai/layout/sidebar', $data);
         $this->load->view('pegawai/dashboard_list', $data);
         $this->load->view('pegawai/layout/footer');
     }

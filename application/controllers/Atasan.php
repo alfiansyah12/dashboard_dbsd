@@ -1,32 +1,26 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Atasan extends CI_Controller {
-
+class Atasan extends MY_Controller
+{
     public function __construct()
     {
         parent::__construct();
-        $this->load->library('session');
+        $this->require_role('atasan');
 
-        if (!$this->session->userdata('logged_in')) redirect('auth');
-        if ($this->session->userdata('role') != 'atasan') show_error('Akses ditolak', 403);
-
-        // cukup load sekali
+        // pastikan model yang dipakai di file ini diload
         $this->load->model('Divisi_model');
         $this->load->model('Atasan_target_model');
         $this->load->model('Goals_model');
-
-
-        // WIB global untuk controller ini
-        date_default_timezone_set('Asia/Jakarta');
     }
 
     public function index()
     {
         $filter_divisi_id = $this->input->get('divisi_id', true);
+        $filter_divisi_id = ($filter_divisi_id !== null && $filter_divisi_id !== '') ? (int)$filter_divisi_id : null;
 
         // =======================
-        // TABEL MONITORING (last_update dari pegawai)
+        // TABEL MONITORING
         // =======================
         $this->db->select("
             pt.id as pegawai_tugas_id,
@@ -57,11 +51,10 @@ class Atasan extends CI_Controller {
         $this->db->join('dashboard_input di', 'di.pegawai_tugas_id = pt.id', 'left');
         $this->db->join('atasan_review ar', 'ar.pegawai_tugas_id = pt.id', 'left');
 
-        if ($filter_divisi_id !== null && $filter_divisi_id !== '') {
-            $this->db->where('t.divisi_id', (int)$filter_divisi_id);
+        if ($filter_divisi_id !== null) {
+            $this->db->where('t.divisi_id', $filter_divisi_id);
         }
 
-        // pantau yg terbaru update pegawai
         $this->db->order_by('last_update', 'DESC');
         $data['rows'] = $this->db->get()->result();
 
@@ -69,14 +62,35 @@ class Atasan extends CI_Controller {
         $data['divisi'] = $this->Divisi_model->getAll();
         $data['filter_divisi_id'] = $filter_divisi_id;
 
-        // target & realisasi
+        // =======================
+        // TARGET & REALISASI + CHART
+        // =======================
         $data['targets'] = $this->Atasan_target_model->getAll($filter_divisi_id);
 
-        // =======================
-// GOALS TABLE (monitoring goals pegawai)
-// =======================
-$data['goals_rows'] = $this->Goals_model->getAllForAtasan($filter_divisi_id);
+        $labels = [];
+        $targetSeries = [];
+        $realisasiSeries = [];
+        $feeSeries = [];
+        $volSeries = [];
 
+        foreach (($data['targets'] ?? []) as $t) {
+            $labels[]         = date('Y-m', strtotime($t->periode));
+            $targetSeries[]   = (int)$t->target;
+            $realisasiSeries[]= (int)$t->realisasi;
+            $feeSeries[]      = (int)($t->fee_base_income ?? 0);
+            $volSeries[]      = (int)($t->volume_of_agent ?? 0);
+        }
+
+        $data['chart_labels']    = json_encode($labels);
+        $data['chart_target']    = json_encode($targetSeries);
+        $data['chart_realisasi'] = json_encode($realisasiSeries);
+        $data['chart_fee']       = json_encode($feeSeries);
+        $data['chart_vol']       = json_encode($volSeries);
+
+        // =======================
+        // GOALS TABLE
+        // =======================
+        $data['goals_rows'] = $this->Goals_model->getAllForAtasan($filter_divisi_id);
 
         // =======================
         // CHART 1: Penilaian Atasan
@@ -86,8 +100,8 @@ $data['goals_rows'] = $this->Goals_model->getAllForAtasan($filter_divisi_id);
         $this->db->join('pegawai_tugas pt', 'pt.id = ar.pegawai_tugas_id');
         $this->db->join('tugas t', 't.id = pt.tugas_id');
 
-        if ($filter_divisi_id !== null && $filter_divisi_id !== '') {
-            $this->db->where('t.divisi_id', (int)$filter_divisi_id);
+        if ($filter_divisi_id !== null) {
+            $this->db->where('t.divisi_id', $filter_divisi_id);
         }
 
         $this->db->group_by('ar.review_status');
@@ -99,6 +113,7 @@ $data['goals_rows'] = $this->Goals_model->getAllForAtasan($filter_divisi_id);
             $reviewLabels[] = $r->review_status;
             $reviewValues[] = (int)$r->total;
         }
+
         if (empty($reviewLabels)) {
             $reviewLabels = ['done', 'not_yet'];
             $reviewValues = [0, 0];
@@ -111,8 +126,8 @@ $data['goals_rows'] = $this->Goals_model->getAllForAtasan($filter_divisi_id);
         $this->db->from('pegawai_tugas pt');
         $this->db->join('tugas t', 't.id = pt.tugas_id');
 
-        if ($filter_divisi_id !== null && $filter_divisi_id !== '') {
-            $this->db->where('t.divisi_id', (int)$filter_divisi_id);
+        if ($filter_divisi_id !== null) {
+            $this->db->where('t.divisi_id', $filter_divisi_id);
         }
 
         $this->db->group_by('pt.status');
@@ -124,6 +139,7 @@ $data['goals_rows'] = $this->Goals_model->getAllForAtasan($filter_divisi_id);
             $statusLabels[] = $s->status;
             $statusValues[] = (int)$s->total;
         }
+
         if (empty($statusLabels)) {
             $statusLabels = ['on going', 'done', 'terminated'];
             $statusValues = [0, 0, 0];
@@ -139,9 +155,9 @@ $data['goals_rows'] = $this->Goals_model->getAllForAtasan($filter_divisi_id);
 
     public function review_store()
     {
-        $pegawai_tugas_id = (int)$this->input->post('pegawai_tugas_id');
+        $pegawai_tugas_id = (int)$this->input->post('pegawai_tugas_id', true);
         $review_status    = $this->input->post('review_status', true);
-        $divisi_id_raw    = $this->input->post('divisi_id', true); // filter halaman
+        $divisi_id_raw    = $this->input->post('divisi_id', true);
 
         if (!$pegawai_tugas_id || !in_array($review_status, ['done','not_yet'], true)) {
             redirect('atasan');
@@ -164,9 +180,8 @@ $data['goals_rows'] = $this->Goals_model->getAllForAtasan($filter_divisi_id);
             $this->db->insert('atasan_review', $data);
         }
 
-        // balik + tetap filter + scroll chart
         $url = 'atasan';
-        if ($divisi_id !== null) $url .= '?divisi_id='.$divisi_id;
+        if ($divisi_id !== null) $url .= '?divisi_id=' . $divisi_id;
         $url .= '#chart';
 
         $this->session->set_flashdata('success', 'Assessment berhasil disimpan.');
@@ -175,9 +190,9 @@ $data['goals_rows'] = $this->Goals_model->getAllForAtasan($filter_divisi_id);
 
     public function target_store()
     {
-        $divisi_id_input   = $this->input->post('divisi_id', true); // divisi untuk data target
-        $current_filter_id = $this->input->post('current_divisi_id', true); // filter halaman (untuk redirect)
-        $periode           = $this->input->post('periode', true);   // YYYY-MM
+        $divisi_id_input   = $this->input->post('divisi_id', true);
+        $current_filter_id = $this->input->post('current_divisi_id', true);
+        $periode           = $this->input->post('periode', true);
         $target            = (int)$this->input->post('target', true);
         $realisasi         = (int)$this->input->post('realisasi', true);
         $catatan           = $this->input->post('catatan', true);
@@ -190,7 +205,7 @@ $data['goals_rows'] = $this->Goals_model->getAllForAtasan($filter_divisi_id);
         $periodeDate = $periode . '-01';
         $divisi_id_db = ($divisi_id_input === '' ? null : (int)$divisi_id_input);
 
-        // === cek exists (handle NULL dengan benar) ===
+        // cek exists (handle NULL)
         $this->db->from('atasan_target');
         $this->db->where('periode', $periodeDate);
         if ($divisi_id_db === null) {
@@ -215,10 +230,9 @@ $data['goals_rows'] = $this->Goals_model->getAllForAtasan($filter_divisi_id);
 
         $this->Atasan_target_model->upsert($data);
 
-        // ✅ redirect harus pakai filter HALAMAN, bukan divisi input target
         $url = 'atasan';
         if ($current_filter_id !== null && $current_filter_id !== '') {
-            $url .= '?divisi_id='.(int)$current_filter_id;
+            $url .= '?divisi_id=' . (int)$current_filter_id;
         }
         $url .= '#target';
 
@@ -227,20 +241,25 @@ $data['goals_rows'] = $this->Goals_model->getAllForAtasan($filter_divisi_id);
     }
 
     public function terminate($pegawai_tugas_id)
-{
-    if (!$pegawai_tugas_id) {
-        redirect('atasan');
-        return;
+    {
+        $pegawai_tugas_id = (int)$pegawai_tugas_id;
+        if (!$pegawai_tugas_id) {
+            redirect('atasan');
+            return;
+        }
+
+        // biar balik ke filter divisi yang sama (kalau ada)
+        $filter_divisi_id = $this->input->get('divisi_id', true);
+        $filter_divisi_id = ($filter_divisi_id !== null && $filter_divisi_id !== '') ? (int)$filter_divisi_id : null;
+
+        $this->db->where('id', $pegawai_tugas_id)->update('pegawai_tugas', [
+            'status' => 'terminated'
+        ]);
+
+        $this->session->set_flashdata('success', 'Task berhasil di-terminate.');
+
+        $url = 'atasan';
+        if ($filter_divisi_id !== null) $url .= '?divisi_id=' . $filter_divisi_id;
+        redirect($url);
     }
-
-    // update status tugas pegawai
-    $this->db->where('id', (int)$pegawai_tugas_id)
-             ->update('pegawai_tugas', [
-                 'status' => 'terminated'
-             ]);
-
-    $this->session->set_flashdata('success', 'Task berhasil di-terminate.');
-    redirect('atasan');
-}
-
 }

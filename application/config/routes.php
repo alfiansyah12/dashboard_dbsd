@@ -53,6 +53,13 @@ $route['default_controller'] = 'auth';
 $route['login'] = 'auth';
 
 $route['admin']  = 'admin/index';
+$route['admin/target'] = 'admin/target';
+$route['admin/target_store'] = 'admin/target_store';
+$route['admin/reset_password/(:num)'] = 'admin/reset_password/$1';
+$route['admin/target_delete/(:num)'] = 'admin/target_delete/$1';
+$route['admin/target_update/(:num)'] = 'admin/target_update/$1';
+
+
 
 /** PEGAWAI **/
 $route['pegawai'] = 'pegawai/index';
@@ -67,7 +74,6 @@ $route['pegawai/dashboard_store'] = 'pegawai/dashboard_store';
 /** ATASAN **/
 $route['atasan'] = 'atasan/index';
 $route['atasan/review_store'] = 'atasan/review_store';
-$route['atasan/target_store'] = 'atasan/target_store';
 $route['atasan/terminate/(:num)'] = 'atasan/terminate/$1';
 
 // $route['atasan/chart'] = 'atasan/chart'; // hapus kalau chart sudah 1 halaman di output

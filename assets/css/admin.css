@@ -1,0 +1,440 @@
+/* ================================
+   BTN THEME TOKENS
+================================ */
+:root {
+	--btn-blue: #003c8f;
+	--btn-blue-2: #0b4db3;
+	--btn-gold: rgba(245, 180, 0, 0.85);
+	--btn-bg: #f3f6fb;
+	--btn-text: #0f172a;
+	--btn-muted: #64748b;
+	--btn-border: rgba(15, 23, 42, 0.08);
+}
+
+/* ================================
+   BASE LAYOUT (STICKY FOOTER)
+================================ */
+html,
+body {
+	height: 100%;
+}
+
+.app-body {
+	margin: 0;
+	padding: 0;
+	overflow-x: hidden;
+	background: var(--btn-bg);
+	color: var(--btn-text);
+
+	min-height: 100vh;
+	display: flex;
+	flex-direction: column;
+}
+
+/* wrapper sidebar + content */
+.app-wrap {
+	flex: 1 0 auto;
+	display: flex;
+	align-items: stretch;
+	min-height: 0;
+}
+
+/* Sidebar fixed width */
+.app-sidebar {
+	flex: 0 0 260px;
+	width: 260px;
+	min-height: 100%;
+}
+
+/* Content */
+.app-content {
+	flex: 1 1 auto;
+	min-width: 0;
+	padding: 18px 22px;
+	height: auto !important;
+	overflow: visible !important; /* body yang scroll */
+}
+
+/* Footer */
+.app-footer {
+	flex-shrink: 0;
+	position: static !important;
+	width: 100%;
+}
+
+/* ================================
+   NAVBAR (BTN STYLE)
+================================ */
+.app-navbar {
+	background: linear-gradient(90deg, var(--btn-blue), #062b63) !important;
+	backdrop-filter: blur(10px);
+	border-bottom: 3px solid rgba(248, 30, 30, 0.85);
+}
+.app-navbar .navbar-brand {
+	font-weight: 900;
+	letter-spacing: 0.3px;
+}
+.app-navbar .nav-link {
+	color: rgba(255, 255, 255, 0.85) !important;
+}
+.app-navbar .nav-link:hover {
+	color: #fff !important;
+}
+
+/* ================================
+   SIDEBAR (BTN STYLE)
+================================ */
+.app-sidebar {
+	background: linear-gradient(180deg, #061d3f, #04152e) !important;
+	color: rgba(255, 255, 255, 0.88) !important;
+	border-right: 1px solid rgba(255, 255, 255, 0.08);
+	padding: 16px;
+}
+
+.app-sidebar .sidebar-brand {
+	padding: 10px 10px 14px;
+	margin-bottom: 10px;
+	border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+.app-sidebar .sidebar-title {
+	margin: 0;
+	text-align: center;
+	color: #fff !important;
+	font-weight: 900;
+	letter-spacing: 0.8px;
+	font-size: 13px;
+}
+.app-sidebar .sidebar-subtitle {
+	margin-top: 6px;
+	text-align: center;
+	font-size: 12px;
+	color: rgba(229, 231, 235, 0.75) !important;
+}
+
+.app-sidebar .sidebar-nav .nav-link {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 10px;
+
+	color: rgba(255, 255, 255, 0.86) !important;
+	background: transparent !important;
+
+	padding: 10px 12px;
+	border-radius: 12px;
+	margin-bottom: 8px;
+	transition: all 0.2s ease;
+}
+.app-sidebar .sidebar-nav .nav-link .left {
+	display: flex;
+	align-items: center;
+	gap: 0.55rem;
+}
+.app-sidebar .sidebar-nav .nav-link i {
+	width: 18px;
+	text-align: center;
+	opacity: 0.95;
+	color: rgba(255, 255, 255, 0.88) !important;
+}
+.app-sidebar .sidebar-nav .nav-link:hover {
+	background: rgba(255, 255, 255, 0.08) !important;
+	transform: translateX(3px);
+}
+
+.app-sidebar .sidebar-nav .nav-link.active {
+	background: linear-gradient(135deg, var(--btn-blue-2), #0a3f92) !important;
+	box-shadow: 0 10px 18px rgba(0, 60, 143, 0.28);
+	font-weight: 900;
+	position: relative;
+}
+.app-sidebar .sidebar-nav .nav-link.active::before {
+	content: "";
+	position: absolute;
+	left: 0;
+	top: 10px;
+	bottom: 10px;
+	width: 4px;
+	border-radius: 999px;
+	background: var(--btn-gold);
+}
+
+.app-sidebar .sidebar-badge {
+	background: rgba(255, 255, 255, 0.12) !important;
+	color: #fff !important;
+	border: 1px solid rgba(255, 255, 255, 0.18);
+	font-weight: 900;
+	border-radius: 999px;
+	padding: 4px 8px;
+	font-size: 11px;
+}
+
+.app-sidebar .sidebar-divider {
+	height: 1px;
+	background: rgba(255, 255, 255, 0.1);
+	margin: 12px 0;
+}
+
+.app-sidebar .sidebar-nav .nav-link.logout {
+	color: #ffb4b4 !important;
+	background: rgba(220, 53, 69, 0.12) !important;
+	border: 1px solid rgba(220, 53, 69, 0.18);
+}
+.app-sidebar .sidebar-nav .nav-link.logout i {
+	color: #ffb4b4 !important;
+}
+.app-sidebar .sidebar-nav .nav-link.logout:hover {
+	background: rgba(220, 53, 69, 0.18) !important;
+}
+
+/* ================================
+   GLOBAL UI (CARD / FORM / TABLE)
+================================ */
+.card {
+	border-radius: 14px;
+	border: 1px solid var(--btn-border);
+	box-shadow: 0 8px 18px rgba(15, 23, 42, 0.06);
+}
+.card-header {
+	border-radius: 14px 14px 0 0;
+	font-weight: 900;
+	background: #fff;
+	border-bottom: 1px solid var(--btn-border);
+}
+
+.form-control,
+.form-select {
+	border-radius: 10px;
+	border-color: rgba(0, 0, 0, 0.12);
+}
+.form-control:focus,
+.form-select:focus {
+	box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.12);
+	border-color: rgba(13, 110, 253, 0.55);
+}
+
+.btn {
+	border-radius: 10px;
+}
+.btn-sm {
+	padding: 0.35rem 0.65rem;
+}
+
+.table thead th {
+	white-space: nowrap;
+}
+.table td {
+	vertical-align: middle;
+}
+.table-hover tbody tr:hover {
+	background: rgba(0, 60, 143, 0.04);
+}
+
+/* ================================
+   BUTTON (BTN STYLE)
+================================ */
+.btn-primary {
+	background: var(--btn-blue-2);
+	border-color: var(--btn-blue-2);
+	font-weight: 900;
+}
+.btn-primary:hover {
+	background: #083e92;
+	border-color: #083e92;
+}
+.btn-outline-primary {
+	border-color: rgba(0, 60, 143, 0.35);
+	color: var(--btn-blue);
+	font-weight: 900;
+}
+.btn-outline-primary:hover {
+	background: rgba(0, 60, 143, 0.08);
+	color: var(--btn-blue);
+}
+
+/* optional emas */
+.btn-gold {
+	background: var(--btn-gold);
+	border-color: var(--btn-gold);
+	color: #1f2937;
+	font-weight: 900;
+}
+.btn-gold:hover {
+	filter: brightness(0.95);
+}
+
+/* ================================
+   FOOTER (BTN)
+================================ */
+.app-footer {
+	background: linear-gradient(90deg, #03122a, #051a3a);
+	border-top: 2px solid rgba(255, 31, 31, 0.75);
+	color: rgba(255, 255, 255, 0.85);
+}
+.app-footer a {
+	color: #93c5fd;
+	text-decoration: none;
+}
+.app-footer a:hover {
+	text-decoration: underline;
+}
+
+/* ================================
+   RESET PASSWORD MODAL (DESKTOP + MOBILE)
+   -> ini HARUS DI LUAR @media
+================================ */
+.modal-reset .modal-dialog {
+	max-width: 520px;
+}
+
+.modal-reset .modal-content {
+	border-radius: 16px;
+	overflow: hidden;
+	border: 1px solid rgba(15, 23, 42, 0.1);
+	box-shadow: 0 18px 60px rgba(2, 10, 25, 0.35);
+}
+
+/* header biru + garis emas */
+.modal-reset .modal-header {
+	background: linear-gradient(90deg, var(--btn-blue), #062b63);
+	border-bottom: 2px solid rgba(245, 180, 0, 0.85);
+	padding: 14px 18px;
+}
+.modal-reset .modal-title {
+	color: #fff;
+	font-weight: 900;
+	letter-spacing: 0.2px;
+	font-size: 16px;
+}
+.modal-reset .btn-close {
+	filter: invert(1);
+	opacity: 0.9;
+}
+
+/* body */
+.modal-reset .modal-body {
+	background: #fff;
+	padding: 18px;
+}
+
+/* footer */
+.modal-reset .modal-footer {
+	background: #f8fafc;
+	border-top: 1px solid rgba(15, 23, 42, 0.08);
+	padding: 12px 18px;
+}
+
+/* user box */
+.reset-userbox {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	padding: 12px;
+	border-radius: 12px;
+	background: rgba(0, 60, 143, 0.06);
+	border: 1px solid rgba(0, 60, 143, 0.12);
+	margin-bottom: 14px;
+}
+.reset-userbox .left {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	min-width: 0;
+}
+.reset-userbox .avatar {
+	width: 40px;
+	height: 40px;
+	border-radius: 12px;
+	display: grid;
+	place-items: center;
+	background: rgba(0, 60, 143, 0.14);
+	color: var(--btn-blue);
+	font-weight: 900;
+	flex: 0 0 auto;
+}
+.reset-userbox .meta {
+	min-width: 0;
+}
+.reset-userbox .meta .name {
+	font-weight: 900;
+	color: #0b1f3a;
+	line-height: 1.1;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+.reset-userbox .meta .role {
+	font-size: 12px;
+	color: var(--btn-muted);
+	margin-top: 2px;
+}
+
+/* form */
+.reset-form .form-label {
+	font-size: 12px;
+	color: var(--btn-muted);
+	font-weight: 900;
+	margin-bottom: 6px;
+}
+.reset-form .form-control {
+	border-radius: 12px;
+	padding: 10px 12px;
+}
+.reset-hint {
+	font-size: 12px;
+	color: var(--btn-muted);
+	margin-top: 8px;
+}
+
+/* tombol reset */
+.btn-reset {
+	background: var(--btn-gold);
+	border-color: var(--btn-gold);
+	color: #1f2937;
+	font-weight: 900;
+	border-radius: 12px;
+	padding: 9px 14px;
+}
+.btn-reset:hover {
+	filter: brightness(0.95);
+}
+
+/* ================================
+   RESPONSIVE
+================================ */
+@media (max-width: 768px) {
+	.app-wrap {
+		flex-direction: column;
+	}
+	.app-sidebar {
+		flex: 0 0 auto;
+		width: 100%;
+	}
+	.app-content {
+		padding: 14px;
+		overflow: visible !important;
+	}
+
+	/* ================================
+   MOBILE OFFCANVAS SIDEBAR
+================================ */
+	.app-sidebar-offcanvas {
+		background: linear-gradient(180deg, #061d3f, #04152e) !important;
+		color: rgba(255, 255, 255, 0.88) !important;
+		border-right: 1px solid rgba(255, 255, 255, 0.08);
+	}
+
+	.app-sidebar-offcanvas .offcanvas-header {
+		background: linear-gradient(90deg, var(--btn-blue), #062b63);
+		border-bottom: 2px solid rgba(245, 180, 0, 0.85);
+	}
+
+	.app-sidebar-offcanvas .btn-close {
+		filter: invert(1);
+		opacity: 0.9;
+	}
+
+	.app-sidebar-offcanvas .offcanvas-body {
+		overflow-y: auto;
+	}
+}
