@@ -23,7 +23,7 @@ $periode_val = $is_edit ? date('Y-m', strtotime($edit->periode)) : '';
     <h3 class="mb-1">Target & Realisasi</h3>
     <div class="text-muted small">Ringkasan KPI, grafik per periode, dan input data.</div>
   </div>
-
+  
   <div class="d-flex gap-2">
     <a href="<?= base_url('index.php/admin') ?>" class="btn btn-sm btn-outline-primary">
       <i class="fa-solid fa-house me-1"></i> Dashboard
