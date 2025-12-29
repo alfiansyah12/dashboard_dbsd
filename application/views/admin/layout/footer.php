@@ -1,7 +1,11 @@
 <footer class="app-footer py-3">
   <div class="container-fluid px-3 small d-flex justify-content-between flex-wrap gap-2">
     <div>© <?= date('Y') ?> BTN Dashboard — Admin System</div>
-    <div class="text-muted">Session: <span class="badge text-bg-success">Active</span></div>
+    <div class="text-muted">
+  <span class="text-white">Session:</span>
+  <span class="badge text-bg-success">Active</span>
+</div>
+
   </div>
 </footer>
 
