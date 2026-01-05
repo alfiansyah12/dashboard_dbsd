@@ -1,9 +1,10 @@
 <?php
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('BASEPATH') or exit('No direct script access allowed');
 
-class Divisi_model extends CI_Model {
+class Departemen_model extends CI_Model
+{
 
-    private $table = 'divisi';
+    private $table = 'departemen';
 
     public function getAll()
     {

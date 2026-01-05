@@ -8,7 +8,7 @@
 
     <li class="nav-item">
       <a href="<?= base_url('index.php/admin'); ?>"
-         class="nav-link <?= ($this->uri->segment(2) == '' ? 'active' : '') ?>">
+        class="nav-link <?= ($this->uri->segment(2) == '' ? 'active' : '') ?>">
         <span class="left">
           <i class="fa-solid fa-gauge-high"></i> Dashboard
         </span>
@@ -17,7 +17,7 @@
 
     <li class="nav-item">
       <a href="<?= base_url('index.php/admin/user'); ?>"
-         class="nav-link <?= ($this->uri->segment(2) == 'user' ? 'active' : '') ?>">
+        class="nav-link <?= ($this->uri->segment(2) == 'user' ? 'active' : '') ?>">
         <span class="left">
           <i class="fa-solid fa-users"></i> Manage User
         </span>
@@ -30,21 +30,21 @@
     </li>
 
     <li class="nav-item">
-      <a href="<?= base_url('index.php/admin/divisi'); ?>"
-         class="nav-link <?= ($this->uri->segment(2) == 'divisi' ? 'active' : '') ?>">
+      <a href="<?= base_url('index.php/admin/departemen'); ?>"
+        class="nav-link <?= ($this->uri->segment(2) == 'departemen' ? 'active' : '') ?>">
         <span class="left">
-          <i class="fa-solid fa-sitemap"></i> Division
+          <i class="fa-solid fa-sitemap"></i> Departement
         </span>
 
-        <?php if (isset($total_divisi)): ?>
-          <span class="badge sidebar-badge"><?= (int)$total_divisi ?></span>
+        <?php if (isset($total_departemen)): ?>
+          <span class="badge sidebar-badge"><?= (int)$total_departemen ?></span>
         <?php endif; ?>
       </a>
     </li>
 
     <li class="nav-item">
       <a href="<?= base_url('index.php/admin/tugas'); ?>"
-         class="nav-link <?= ($this->uri->segment(2) == 'tugas' ? 'active' : '') ?>">
+        class="nav-link <?= ($this->uri->segment(2) == 'tugas' ? 'active' : '') ?>">
         <span class="left">
           <i class="fa-solid fa-list-check"></i> Task
         </span>
@@ -57,7 +57,7 @@
 
     <li class="nav-item">
       <a href="<?= base_url('index.php/admin/target'); ?>"
-         class="nav-link <?= ($this->uri->segment(2) == 'target' ? 'active' : '') ?>">
+        class="nav-link <?= ($this->uri->segment(2) == 'target' ? 'active' : '') ?>">
         <span class="left">
           <i class="fa-solid fa-chart-line"></i> Target & Realisasi
         </span>
@@ -68,8 +68,8 @@
 
     <li class="nav-item">
       <a href="<?= base_url('index.php/auth/logout'); ?>"
-         class="nav-link logout"
-         onclick="return confirm('Yakin ingin logout?')">
+        class="nav-link logout"
+        onclick="return confirm('Yakin ingin logout?')">
         <span class="left">
           <i class="fa-solid fa-right-from-bracket"></i> Logout
         </span>
@@ -81,9 +81,9 @@
 
 <!-- MOBILE SIDEBAR (OFFCANVAS) -->
 <div class="offcanvas offcanvas-start app-sidebar-offcanvas d-lg-none"
-     tabindex="-1"
-     id="sidebarOffcanvas"
-     aria-labelledby="sidebarOffcanvasLabel">
+  tabindex="-1"
+  id="sidebarOffcanvas"
+  aria-labelledby="sidebarOffcanvasLabel">
   <div class="offcanvas-header">
     <div>
       <div class="sidebar-title" id="sidebarOffcanvasLabel">ADMIN PANEL</div>
@@ -95,74 +95,74 @@
   <div class="offcanvas-body p-0">
     <div class="app-sidebar p-3" style="width:100%; min-height:auto;">
       <ul class="nav flex-column sidebar-nav">
-<li class="nav-item">
-      <a href="<?= base_url('index.php/admin'); ?>"
-         class="nav-link <?= ($this->uri->segment(2) == '' ? 'active' : '') ?>">
-        <span class="left">
-          <i class="fa-solid fa-gauge-high"></i> Dashboard
-        </span>
-      </a>
-    </li>
+        <li class="nav-item">
+          <a href="<?= base_url('index.php/admin'); ?>"
+            class="nav-link <?= ($this->uri->segment(2) == '' ? 'active' : '') ?>">
+            <span class="left">
+              <i class="fa-solid fa-gauge-high"></i> Dashboard
+            </span>
+          </a>
+        </li>
 
-    <li class="nav-item">
-      <a href="<?= base_url('index.php/admin/user'); ?>"
-         class="nav-link <?= ($this->uri->segment(2) == 'user' ? 'active' : '') ?>">
-        <span class="left">
-          <i class="fa-solid fa-users"></i> Manage User
-        </span>
+        <li class="nav-item">
+          <a href="<?= base_url('index.php/admin/user'); ?>"
+            class="nav-link <?= ($this->uri->segment(2) == 'user' ? 'active' : '') ?>">
+            <span class="left">
+              <i class="fa-solid fa-users"></i> Manage User
+            </span>
 
-        <!-- badge dinamis: kalau controller kirim $total_user -->
-        <?php if (isset($total_user)): ?>
-          <span class="badge sidebar-badge"><?= (int)$total_user ?></span>
-        <?php endif; ?>
-      </a>
-    </li>
+            <!-- badge dinamis: kalau controller kirim $total_user -->
+            <?php if (isset($total_user)): ?>
+              <span class="badge sidebar-badge"><?= (int)$total_user ?></span>
+            <?php endif; ?>
+          </a>
+        </li>
 
-    <li class="nav-item">
-      <a href="<?= base_url('index.php/admin/divisi'); ?>"
-         class="nav-link <?= ($this->uri->segment(2) == 'divisi' ? 'active' : '') ?>">
-        <span class="left">
-          <i class="fa-solid fa-sitemap"></i> Division
-        </span>
+        <li class="nav-item">
+          <a href="<?= base_url('index.php/admin/departemen'); ?>"
+            class="nav-link <?= ($this->uri->segment(2) == 'departemen' ? 'active' : '') ?>">
+            <span class="left">
+              <i class="fa-solid fa-sitemap"></i> Departement
+            </span>
 
-        <?php if (isset($total_divisi)): ?>
-          <span class="badge sidebar-badge"><?= (int)$total_divisi ?></span>
-        <?php endif; ?>
-      </a>
-    </li>
+            <?php if (isset($total_departemen)): ?>
+              <span class="badge sidebar-badge"><?= (int)$total_departemen ?></span>
+            <?php endif; ?>
+          </a>
+        </li>
 
-    <li class="nav-item">
-      <a href="<?= base_url('index.php/admin/tugas'); ?>"
-         class="nav-link <?= ($this->uri->segment(2) == 'tugas' ? 'active' : '') ?>">
-        <span class="left">
-          <i class="fa-solid fa-list-check"></i> Task
-        </span>
+        <li class="nav-item">
+          <a href="<?= base_url('index.php/admin/tugas'); ?>"
+            class="nav-link <?= ($this->uri->segment(2) == 'tugas' ? 'active' : '') ?>">
+            <span class="left">
+              <i class="fa-solid fa-list-check"></i> Task
+            </span>
 
-        <?php if (isset($total_tugas)): ?>
-          <span class="badge sidebar-badge"><?= (int)$total_tugas ?></span>
-        <?php endif; ?>
-      </a>
-    </li>
+            <?php if (isset($total_tugas)): ?>
+              <span class="badge sidebar-badge"><?= (int)$total_tugas ?></span>
+            <?php endif; ?>
+          </a>
+        </li>
 
-    <li class="nav-item">
-      <a href="<?= base_url('index.php/admin/target'); ?>"
-         class="nav-link <?= ($this->uri->segment(2) == 'target' ? 'active' : '') ?>">
-        <span class="left">
-          <i class="fa-solid fa-chart-line"></i> Target & Realisasi
-        </span>
-      </a>
-    </li>
+        <li class="nav-item">
+          <a href="<?= base_url('index.php/admin/target'); ?>"
+            class="nav-link <?= ($this->uri->segment(2) == 'target' ? 'active' : '') ?>">
+            <span class="left">
+              <i class="fa-solid fa-chart-line"></i> Target & Realisasi
+            </span>
+          </a>
+        </li>
 
-    <div class="sidebar-divider"></div>
+        <div class="sidebar-divider"></div>
 
-    <li class="nav-item">
-      <a href="<?= base_url('index.php/auth/logout'); ?>"
-         class="nav-link logout"
-         onclick="return confirm('Yakin ingin logout?')">
-        <span class="left">
-          <i class="fa-solid fa-right-from-bracket"></i> Logout
-        </span>
-      </a>
+        <li class="nav-item">
+          <a href="<?= base_url('index.php/auth/logout'); ?>"
+            class="nav-link logout"
+            onclick="return confirm('Yakin ingin logout?')">
+            <span class="left">
+              <i class="fa-solid fa-right-from-bracket"></i> Logout
+            </span>
+          </a>
 
       </ul>
     </div>

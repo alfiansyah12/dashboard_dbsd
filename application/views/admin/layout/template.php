@@ -2,12 +2,12 @@
 
 <div class="app-wrap">
   <?php
-    // kirim badge angka ke sidebar kalau ada (biar dinamis)
-    $this->load->view('admin/layout/sidebar', [
-      'total_user'   => $total_user   ?? null,
-      'total_divisi' => $total_divisi ?? null,
-      'total_tugas'  => $total_tugas  ?? null,
-    ]);
+  // kirim badge angka ke sidebar kalau ada (biar dinamis)
+  $this->load->view('admin/layout/sidebar', [
+    'total_user'   => $total_user   ?? null,
+    'total_departemen' => $total_departemen ?? null,
+    'total_tugas'  => $total_tugas  ?? null,
+  ]);
   ?>
 
   <main class="app-content">

@@ -5,18 +5,18 @@
 <div class="d-flex align-items-center justify-content-between mb-3">
   <div>
     <h3 class="mb-1">Manage User</h3>
-    <div class="text-muted small">Kelola user, role, dan pembagian divisi.</div>
+    <div class="text-muted small">Kelola user, role, dan pembagian departemen.</div>
   </div>
 </div>
 
-<?php if($this->session->flashdata('success')): ?>
+<?php if ($this->session->flashdata('success')): ?>
   <div class="alert alert-success alert-dismissible fade show" role="alert">
     <?= $this->session->flashdata('success') ?>
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
   </div>
 <?php endif; ?>
 
-<?php if($this->session->flashdata('error')): ?>
+<?php if ($this->session->flashdata('error')): ?>
   <div class="alert alert-danger alert-dismissible fade show" role="alert">
     <?= $this->session->flashdata('error') ?>
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
@@ -88,166 +88,167 @@
           <th>Name</th>
           <th>Email</th>
           <th style="width:120px;">Role</th>
-          <th style="width:360px;">Division</th>
+          <th style="width:360px;">Departement</th>
           <th style="width:240px;" class="text-end">Action</th>
         </tr>
       </thead>
 
       <tbody>
-      <?php if(empty($users)): ?>
-        <tr>
-          <td colspan="6" class="text-center text-muted py-4">No data</td>
-        </tr>
-      <?php endif; ?>
+        <?php if (empty($users)): ?>
+          <tr>
+            <td colspan="6" class="text-center text-muted py-4">No data</td>
+          </tr>
+        <?php endif; ?>
 
-      <?php $no=1; foreach($users as $u): ?>
-        <?php
+        <?php $no = 1;
+        foreach ($users as $u): ?>
+          <?php
           $role = strtolower((string)$u->role);
           $roleBadge = 'text-bg-secondary';
           if ($role === 'admin')   $roleBadge = 'text-bg-dark';
           if ($role === 'atasan')  $roleBadge = 'text-bg-info';
           if ($role === 'pegawai') $roleBadge = 'text-bg-success';
-        ?>
+          ?>
 
-        <tr class="text-nowrap">
-          <td><?= $no++ ?></td>
+          <tr class="text-nowrap">
+            <td><?= $no++ ?></td>
 
-          <td class="fw-semibold">
-            <i class="fa-solid fa-user me-2 text-muted"></i>
-            <?= htmlspecialchars($u->nama) ?>
-          </td>
+            <td class="fw-semibold">
+              <i class="fa-solid fa-user me-2 text-muted"></i>
+              <?= htmlspecialchars($u->nama) ?>
+            </td>
 
-          <td class="text-muted"><?= htmlspecialchars($u->email) ?></td>
+            <td class="text-muted"><?= htmlspecialchars($u->email) ?></td>
 
-          <td>
-            <span class="badge <?= $roleBadge ?>">
-              <?= ucfirst(htmlspecialchars($u->role)) ?>
-            </span>
-          </td>
+            <td>
+              <span class="badge <?= $roleBadge ?>">
+                <?= ucfirst(htmlspecialchars($u->role)) ?>
+              </span>
+            </td>
 
-          <!-- ASSIGN DIVISION -->
-          <td class="text-nowrap">
-            <?php if ($u->role === 'pegawai'): ?>
-              <form method="post" action="<?= base_url('index.php/admin/assign_divisi') ?>" class="d-flex gap-2 align-items-center">
-                <input type="hidden" name="user_id" value="<?= (int)$u->id ?>">
+            <!-- ASSIGN D -->
+            <td class="text-nowrap">
+              <?php if ($u->role === 'pegawai'): ?>
+                <form method="post" action="<?= base_url('index.php/admin/assign_departemen') ?>" class="d-flex gap-2 align-items-center">
+                  <input type="hidden" name="user_id" value="<?= (int)$u->id ?>">
 
-                <select name="divisi_id" class="form-select form-select-sm" style="max-width: 220px;">
-                  <option value="">-- Choose Division --</option>
-                  <?php foreach($divisi as $d): ?>
-                    <option value="<?= (int)$d->id ?>" <?= ((int)$u->divisi_id === (int)$d->id ? 'selected' : '') ?>>
-                      <?= htmlspecialchars($d->nama_divisi) ?>
-                    </option>
-                  <?php endforeach ?>
-                </select>
+                  <select name="departemen_id" class="form-select form-select-sm" style="max-width: 220px;">
+                    <option value="">-- Choose Departement --</option>
+                    <?php foreach ($departemen as $d): ?>
+                      <option value="<?= (int)$d->id ?>" <?= ((int)$u->departemen_id === (int)$d->id ? 'selected' : '') ?>>
+                        <?= htmlspecialchars($d->nama_departemen) ?>
+                      </option>
+                    <?php endforeach ?>
+                  </select>
 
-                <button type="submit" class="btn btn-sm btn-outline-primary">
-                  <i class="fa-solid fa-floppy-disk me-1"></i>Save
-                </button>
-              </form>
-            <?php else: ?>
-              <span class="text-muted">-</span>
-            <?php endif ?>
-          </td>
-
-          <!-- ACTION -->
-          <td class="text-end">
-            <div class="d-inline-flex gap-2">
-              <?php if (in_array($u->role, ['pegawai','atasan'], true)): ?>
-                <button type="button"
-                        class="btn btn-sm btn-warning"
-                        data-bs-toggle="modal"
-                        data-bs-target="#resetModal<?= (int)$u->id ?>">
-                  <i class="fa-solid fa-key me-1"></i>Reset
-                </button>
-              <?php endif; ?>
-
-              <?php if ($u->role !== 'admin'): ?>
-                <a href="<?= base_url('index.php/admin/user_delete/'.(int)$u->id) ?>"
-                   class="btn btn-sm btn-danger"
-                   onclick="return confirm('Delete this user?')">
-                  <i class="fa-solid fa-trash me-1"></i>Delete
-                </a>
+                  <button type="submit" class="btn btn-sm btn-outline-primary">
+                    <i class="fa-solid fa-floppy-disk me-1"></i>Save
+                  </button>
+                </form>
               <?php else: ?>
                 <span class="text-muted">-</span>
-              <?php endif; ?>
-            </div>
+              <?php endif ?>
+            </td>
 
-            <!-- MODAL RESET PASSWORD (BTN Style) -->
-            <?php if (in_array($u->role, ['pegawai','atasan'], true)): ?>
-  <div class="modal fade modal-reset" id="resetModal<?= (int)$u->id ?>" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
+            <!-- ACTION -->
+            <td class="text-end">
+              <div class="d-inline-flex gap-2">
+                <?php if (in_array($u->role, ['pegawai', 'atasan'], true)): ?>
+                  <button type="button"
+                    class="btn btn-sm btn-warning"
+                    data-bs-toggle="modal"
+                    data-bs-target="#resetModal<?= (int)$u->id ?>">
+                    <i class="fa-solid fa-key me-1"></i>Reset
+                  </button>
+                <?php endif; ?>
 
-        <form method="post" action="<?= base_url('index.php/admin/reset_password/'.(int)$u->id) ?>">
-          <div class="modal-header">
-            <h5 class="modal-title">
-              <i class="fa-solid fa-key me-2"></i> Reset Password
-            </h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
+                <?php if ($u->role !== 'admin'): ?>
+                  <a href="<?= base_url('index.php/admin/user_delete/' . (int)$u->id) ?>"
+                    class="btn btn-sm btn-danger"
+                    onclick="return confirm('Delete this user?')">
+                    <i class="fa-solid fa-trash me-1"></i>Delete
+                  </a>
+                <?php else: ?>
+                  <span class="text-muted">-</span>
+                <?php endif; ?>
+              </div>
 
-          <div class="modal-body">
-            <div class="reset-userbox">
-              <div class="left">
-                <div class="avatar"><?= strtoupper(substr((string)$u->nama, 0, 1)) ?></div>
-                <div class="meta">
-                  <div class="name"><?= htmlspecialchars($u->nama) ?></div>
-                  <div class="role">Role: <?= htmlspecialchars($u->role) ?></div>
+              <!-- MODAL RESET PASSWORD (BTN Style) -->
+              <?php if (in_array($u->role, ['pegawai', 'atasan'], true)): ?>
+                <div class="modal fade modal-reset" id="resetModal<?= (int)$u->id ?>" tabindex="-1" aria-hidden="true">
+                  <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+
+                      <form method="post" action="<?= base_url('index.php/admin/reset_password/' . (int)$u->id) ?>">
+                        <div class="modal-header">
+                          <h5 class="modal-title">
+                            <i class="fa-solid fa-key me-2"></i> Reset Password
+                          </h5>
+                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+
+                        <div class="modal-body">
+                          <div class="reset-userbox">
+                            <div class="left">
+                              <div class="avatar"><?= strtoupper(substr((string)$u->nama, 0, 1)) ?></div>
+                              <div class="meta">
+                                <div class="name"><?= htmlspecialchars($u->nama) ?></div>
+                                <div class="role">Role: <?= htmlspecialchars($u->role) ?></div>
+                              </div>
+                            </div>
+                            <span class="badge text-bg-primary">ID: <?= (int)$u->id ?></span>
+                          </div>
+
+                          <div class="reset-form">
+                            <label class="form-label">New Password</label>
+                            <input type="password"
+                              name="new_password"
+                              class="form-control"
+                              minlength="6"
+                              required
+                              placeholder="Minimal 6 karakter">
+                            <div class="reset-hint">
+                              Gunakan kombinasi huruf besar, kecil, angka, dan simbol untuk keamanan.
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="modal-footer">
+                          <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                          <button type="submit" class="btn btn-reset"
+                            onclick="return confirm('Reset password for this user?')">
+                            <i class="fa-solid fa-rotate me-1"></i> Reset
+                          </button>
+                        </div>
+                      </form>
+
+                    </div>
+                  </div>
                 </div>
-              </div>
-              <span class="badge text-bg-primary">ID: <?= (int)$u->id ?></span>
-            </div>
-
-            <div class="reset-form">
-              <label class="form-label">New Password</label>
-              <input type="password"
-                     name="new_password"
-                     class="form-control"
-                     minlength="6"
-                     required
-                     placeholder="Minimal 6 karakter">
-              <div class="reset-hint">
-                Gunakan kombinasi huruf besar, kecil, angka, dan simbol untuk keamanan.
-              </div>
-            </div>
-          </div>
-
-          <div class="modal-footer">
-            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
-            <button type="submit" class="btn btn-reset"
-                    onclick="return confirm('Reset password for this user?')">
-              <i class="fa-solid fa-rotate me-1"></i> Reset
-            </button>
-          </div>
-        </form>
-
-      </div>
-    </div>
-  </div>
-<?php endif; ?>
+              <?php endif; ?>
 
 
-          </td>
-        </tr>
+            </td>
+          </tr>
 
-      <?php endforeach ?>
+        <?php endforeach ?>
       </tbody>
     </table>
   </div>
 </div>
 
 <script>
-function togglePw(id, btn){
-  const el = document.getElementById(id);
-  const icon = btn.querySelector('i');
-  if(!el) return;
+  function togglePw(id, btn) {
+    const el = document.getElementById(id);
+    const icon = btn.querySelector('i');
+    if (!el) return;
 
-  if(el.type === 'password'){
-    el.type = 'text';
-    icon.className = 'fa-regular fa-eye-slash';
-  } else {
-    el.type = 'password';
-    icon.className = 'fa-regular fa-eye';
+    if (el.type === 'password') {
+      el.type = 'text';
+      icon.className = 'fa-regular fa-eye-slash';
+    } else {
+      el.type = 'password';
+      icon.className = 'fa-regular fa-eye';
+    }
   }
-}
 </script>

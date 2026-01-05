@@ -1,22 +1,22 @@
 <?php
-// application/views/admin/divisi.php
+// application/views/admin/departemen.php
 ?>
 
 <div class="d-flex align-items-center justify-content-between mb-3">
   <div>
     <h3 class="mb-1">Manage Division</h3>
-    <div class="text-muted small">Tambah dan kelola daftar divisi.</div>
+    <div class="text-muted small">Tambah dan kelola daftar departemen.</div>
   </div>
 </div>
 
-<?php if($this->session->flashdata('success')): ?>
+<?php if ($this->session->flashdata('success')): ?>
   <div class="alert alert-success alert-dismissible fade show" role="alert">
     <?= $this->session->flashdata('success') ?>
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
   </div>
 <?php endif; ?>
 
-<?php if($this->session->flashdata('error')): ?>
+<?php if ($this->session->flashdata('error')): ?>
   <div class="alert alert-danger alert-dismissible fade show" role="alert">
     <?= $this->session->flashdata('error') ?>
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
@@ -32,10 +32,10 @@
   </div>
 
   <div class="card-body">
-    <form method="post" action="<?= base_url('index.php/admin/divisi_store') ?>" class="row g-2 align-items-end">
+    <form method="post" action="<?= base_url('index.php/admin/departemen_store') ?>" class="row g-2 align-items-end">
       <div class="col-md-6 col-lg-5">
         <label class="form-label small text-muted mb-1">Nama Divisi</label>
-        <input type="text" name="nama_divisi" class="form-control" placeholder="Contoh: Marketing" required>
+        <input type="text" name="nama_departemen" class="form-control" placeholder="Contoh: Marketing" required>
       </div>
 
       <div class="col-md-3 col-lg-2 d-grid">
@@ -53,7 +53,7 @@
       <i class="fa-solid fa-list me-2 text-primary"></i>Daftar Division
     </div>
     <span class="badge text-bg-primary">
-      Total: <?= isset($divisi) ? count($divisi) : 0 ?>
+      Total: <?= isset($departemen) ? count($departemen) : 0 ?>
     </span>
   </div>
 
@@ -68,20 +68,21 @@
       </thead>
 
       <tbody>
-        <?php if(empty($divisi)): ?>
+        <?php if (empty($departemen)): ?>
           <tr>
             <td colspan="3" class="text-center text-muted py-4">No data</td>
           </tr>
         <?php endif; ?>
 
-        <?php $no=1; foreach($divisi as $d): ?>
+        <?php $no = 1;
+        foreach ($departemen as $d): ?>
           <tr class="text-nowrap">
             <td><?= $no++ ?></td>
-            <td class="fw-semibold"><?= htmlspecialchars($d->nama_divisi) ?></td>
+            <td class="fw-semibold"><?= htmlspecialchars($d->nama_departemen) ?></td>
             <td class="text-end">
-              <a href="<?= base_url('index.php/admin/divisi_delete/'.(int)$d->id) ?>"
-                 class="btn btn-sm btn-danger"
-                 onclick="return confirm('Hapus divisi ini?')">
+              <a href="<?= base_url('index.php/admin/departemen_delete/' . (int)$d->id) ?>"
+                class="btn btn-sm btn-danger"
+                onclick="return confirm('Hapus departemen ini?')">
                 <i class="fa-solid fa-trash me-1"></i>Delete
               </a>
             </td>

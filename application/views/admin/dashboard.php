@@ -39,9 +39,9 @@
     <div class="card border-0 shadow-sm kpi kpi-success">
       <div class="card-body d-flex align-items-center justify-content-between">
         <div>
-          <div class="opacity-75 small">Total Division</div>
-          <div class="display-6 fw-bold mb-0"><?= (int)($total_divisi ?? 0) ?></div>
-          <div class="opacity-75 small mt-1">Divisi aktif</div>
+          <div class="opacity-75 small">Total Departement</div>
+          <div class="display-6 fw-bold mb-0"><?= (int)($total_departemen ?? 0) ?></div>
+          <div class="opacity-75 small mt-1">Departemen aktif</div>
         </div>
         <div class="kpi-icon"><i class="fa-solid fa-sitemap"></i></div>
       </div>
@@ -75,8 +75,8 @@
           <a class="btn btn-outline-primary" href="<?= base_url('index.php/admin/user') ?>">
             <i class="fa-solid fa-user-gear me-1"></i> Kelola User
           </a>
-          <a class="btn btn-outline-primary" href="<?= base_url('index.php/admin/divisi') ?>">
-            <i class="fa-solid fa-sitemap me-1"></i> Kelola Division
+          <a class="btn btn-outline-primary" href="<?= base_url('index.php/admin/departemen') ?>">
+            <i class="fa-solid fa-sitemap me-1"></i> Kelola Departement
           </a>
           <a class="btn btn-outline-primary" href="<?= base_url('index.php/admin/tugas') ?>">
             <i class="fa-solid fa-tasks me-1"></i> Kelola Task

@@ -1,7 +1,8 @@
 <?php
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('BASEPATH') or exit('No direct script access allowed');
 
-class Goals_model extends CI_Model {
+class Goals_model extends CI_Model
+{
 
     private $table = 'goals';
 
@@ -33,7 +34,7 @@ class Goals_model extends CI_Model {
         return $this->db->insert_id();
     }
 
-    public function getAllForAtasan($filter_divisi_id = null)
+    public function getAllForAtasan($filter_departemen_id = null)
     {
         $this->db->select('
             g.id,
@@ -47,16 +48,16 @@ class Goals_model extends CI_Model {
 
             u.nama as pegawai_nama,
             t.nama_tugas,
-            d.nama_divisi
+            d.nama_departemen
         ');
         $this->db->from('goals g');
         $this->db->join('pegawai_tugas pt', 'pt.id = g.pegawai_tugas_id');
         $this->db->join('users u', 'u.id = pt.user_id');
         $this->db->join('tugas t', 't.id = pt.tugas_id');
-        $this->db->join('divisi d', 'd.id = t.divisi_id');
+        $this->db->join('departemen d', 'd.id = t.departemen_id');
 
-        if ($filter_divisi_id !== null && $filter_divisi_id !== '') {
-            $this->db->where('t.divisi_id', (int)$filter_divisi_id);
+        if ($filter_departemen_id !== null && $filter_departemen_id !== '') {
+            $this->db->where('t.departemen_id', (int)$filter_departemen_id);
         }
 
         $this->db->order_by('COALESCE(g.updated_at,g.created_at)', 'DESC', false);

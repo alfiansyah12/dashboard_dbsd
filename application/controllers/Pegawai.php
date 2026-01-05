@@ -1,5 +1,5 @@
 <?php
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('BASEPATH') or exit('No direct script access allowed');
 
 class Pegawai extends MY_Controller
 {
@@ -34,10 +34,10 @@ class Pegawai extends MY_Controller
 
     public function pilih_tugas()
     {
-        $divisi_id = (int)$this->session->userdata('divisi_id');
+        $departemen_id = (int)$this->session->userdata('departemen_id');
 
         $data = [];
-        $data['tugas'] = $this->Tugas_model->getByDivisi($divisi_id);
+        $data['tugas'] = $this->Tugas_model->getByDepartemen($departemen_id);
         $data['has_active_task'] = $this->hasActiveTask();
 
         $this->load->view('pegawai/layout/header', ['title' => 'Pilih Tugas']);

@@ -1,19 +1,20 @@
 <?php
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('BASEPATH') or exit('No direct script access allowed');
 
-class Admin extends MY_Controller {
+class Admin extends MY_Controller
+{
 
 
     public function __construct()
-{
-    parent::__construct();
+    {
+        parent::__construct();
 
-    $this->load->model('User_model');
-    $this->load->model('Divisi_model');
-    $this->load->model('Tugas_model');
+        $this->load->model('User_model');
+        $this->load->model('Departemen_model');
+        $this->load->model('Tugas_model');
 
-    $this->require_role('admin'); // ✅ semua method admin otomatis aman
-}
+        $this->require_role('admin'); // ✅ semua method admin otomatis aman
+    }
 
 
     /**
@@ -34,7 +35,7 @@ class Admin extends MY_Controller {
     {
         $data = [
             'total_user'   => $this->db->count_all('users'),
-            'total_divisi' => $this->db->count_all('divisi'),
+            'total_departemen' => $this->db->count_all('departemen'),
             'total_tugas'  => $this->db->count_all('tugas'),
         ];
 
@@ -43,8 +44,8 @@ class Admin extends MY_Controller {
 
     public function user()
     {
-        $data['users']  = $this->User_model->getAllWithDivisi();
-        $data['divisi'] = $this->Divisi_model->getAll();
+        $data['users']  = $this->User_model->getAllWithDepartemen();
+        $data['departemen'] = $this->Departemen_model->getAll();
 
         $this->render('Kelola User', 'admin/user', $data);
     }
@@ -68,29 +69,29 @@ class Admin extends MY_Controller {
         redirect('admin/user');
     }
 
-    public function divisi()
+    public function departemen()
     {
-        $data['divisi'] = $this->Divisi_model->getAll();
-        $this->render('Kelola Divisi', 'admin/divisi', $data);
+        $data['departemen'] = $this->Departemen_model->getAll();
+        $this->render('Kelola Departemen', 'admin/departemen', $data);
     }
 
-    public function divisi_store()
+    public function departemen_store()
     {
-        $payload = ['nama_divisi' => $this->input->post('nama_divisi', true)];
-        $this->Divisi_model->insert($payload);
-        redirect('admin/divisi');
+        $payload = ['nama_departemen' => $this->input->post('nama_departemen', true)];
+        $this->Departemen_model->insert($payload);
+        redirect('admin/departemen');
     }
 
-    public function divisi_delete($id)
+    public function departemen_delete($id)
     {
-        $this->Divisi_model->delete((int)$id);
-        redirect('admin/divisi');
+        $this->Departemen_model->delete((int)$id);
+        redirect('admin/departemen');
     }
 
     public function tugas()
     {
         $data['tugas']  = $this->Tugas_model->getAll();
-        $data['divisi'] = $this->Divisi_model->getAll();
+        $data['departemen'] = $this->Departemen_model->getAll();
 
         $this->render('Kelola Tugas', 'admin/tugas', $data);
     }
@@ -100,7 +101,7 @@ class Admin extends MY_Controller {
         $payload = [
             'nama_tugas' => $this->input->post('nama_tugas', true),
             'deskripsi'  => $this->input->post('deskripsi', true),
-            'divisi_id'  => (int)$this->input->post('divisi_id', true),
+            'departemen_id'  => (int)$this->input->post('departemen_id', true),
         ];
 
         $this->Tugas_model->insert($payload);
@@ -113,11 +114,11 @@ class Admin extends MY_Controller {
         redirect('admin/tugas');
     }
 
-    public function assign_divisi()
+    public function assign_departemen()
     {
         $this->db->where('id', (int)$this->input->post('user_id'));
         $this->db->update('users', [
-            'divisi_id' => (int)$this->input->post('divisi_id')
+            'departemen_id' => (int)$this->input->post('departemen_id')
         ]);
 
         redirect('admin/user');
@@ -183,6 +184,7 @@ class Admin extends MY_Controller {
             'periode'          => $periode . '-01',
             'target'           => (int)$this->input->post('target', true),
             'realisasi'        => (int)$this->input->post('realisasi', true),
+            'transaksi'        => (int)$this->input->post('transaksi', true),
             'fee_base_income'  => (int)$this->input->post('fee_base_income', true),
             'volume_of_agent'  => (int)$this->input->post('volume_of_agent', true),
             'catatan'          => $this->input->post('catatan', true),
@@ -211,7 +213,7 @@ class Admin extends MY_Controller {
         $periode = $this->input->post('periode', true);
         if (!$periode) {
             $this->session->set_flashdata('error', 'Periode wajib diisi.');
-            redirect('admin/target?edit_id='.$id);
+            redirect('admin/target?edit_id=' . $id);
             return;
         }
 
@@ -221,6 +223,7 @@ class Admin extends MY_Controller {
             'periode'          => $periode . '-01',
             'target'           => (int)$this->input->post('target', true),
             'realisasi'        => (int)$this->input->post('realisasi', true),
+            'transaksi'        => (int)$this->input->post('transaksi', true),
             'fee_base_income'  => (int)$this->input->post('fee_base_income', true),
             'volume_of_agent'  => (int)$this->input->post('volume_of_agent', true),
             'catatan'          => $this->input->post('catatan', true),
@@ -254,7 +257,7 @@ class Admin extends MY_Controller {
         $user = $this->db->get_where('users', ['id' => $user_id])->row();
         if (!$user) show_error('User tidak ditemukan', 404);
 
-        if (!in_array($user->role, ['pegawai','atasan'], true)) {
+        if (!in_array($user->role, ['pegawai', 'atasan'], true)) {
             $this->session->set_flashdata('error', 'Hanya pegawai/atasan yang bisa di-reset.');
             redirect('admin/user');
             return;
@@ -275,7 +278,7 @@ class Admin extends MY_Controller {
             'reset_at' => $now,
         ]);
 
-        $this->session->set_flashdata('success', 'Password berhasil di-reset untuk '.$user->nama.'.');
+        $this->session->set_flashdata('success', 'Password berhasil di-reset untuk ' . $user->nama . '.');
         redirect('admin/user');
     }
 }

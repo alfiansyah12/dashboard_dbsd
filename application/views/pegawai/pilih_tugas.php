@@ -7,9 +7,9 @@
         <label>Task</label>
         <select name="tugas_id" class="form-control" required>
           <option value="">-- Choose Task --</option>
-          <?php foreach($tugas as $t): ?>
+          <?php foreach ($tugas as $t): ?>
             <option value="<?= $t->id ?>">
-              <?= $t->nama_tugas ?> (<?= $t->nama_divisi ?>)
+              <?= $t->nama_tugas ?> (<?= $t->nama_departemen ?>)
             </option>
           <?php endforeach; ?>
         </select>

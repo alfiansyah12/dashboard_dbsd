@@ -5,18 +5,18 @@
 <div class="d-flex align-items-center justify-content-between mb-3">
   <div>
     <h3 class="mb-1">Manage Task</h3>
-    <div class="text-muted small">Tambah dan kelola tugas berdasarkan divisi.</div>
+    <div class="text-muted small">Tambah dan kelola tugas berdasarkan departemen.</div>
   </div>
 </div>
 
-<?php if($this->session->flashdata('success')): ?>
+<?php if ($this->session->flashdata('success')): ?>
   <div class="alert alert-success alert-dismissible fade show" role="alert">
     <?= $this->session->flashdata('success') ?>
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
   </div>
 <?php endif; ?>
 
-<?php if($this->session->flashdata('error')): ?>
+<?php if ($this->session->flashdata('error')): ?>
   <div class="alert alert-danger alert-dismissible fade show" role="alert">
     <?= $this->session->flashdata('error') ?>
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
@@ -40,11 +40,11 @@
       </div>
 
       <div class="col-md-4 col-lg-3">
-        <label class="form-label small text-muted mb-1">Division</label>
-        <select name="divisi_id" class="form-select" required>
-          <option value="">Choose Division</option>
-          <?php foreach($divisi as $d): ?>
-            <option value="<?= (int)$d->id ?>"><?= htmlspecialchars($d->nama_divisi) ?></option>
+        <label class="form-label small text-muted mb-1">Departement</label>
+        <select name="departemen_id" class="form-select" required>
+          <option value="">Choose Departement</option>
+          <?php foreach ($departemen as $d): ?>
+            <option value="<?= (int)$d->id ?>"><?= htmlspecialchars($d->nama_departemen) ?></option>
           <?php endforeach ?>
         </select>
       </div>
@@ -80,23 +80,24 @@
         <tr class="text-nowrap">
           <th style="width:70px;">No</th>
           <th>Name Task</th>
-          <th style="width:220px;">Division</th>
+          <th style="width:220px;">Departement</th>
           <th>Description</th>
           <th style="width:160px;" class="text-end">Action</th>
         </tr>
       </thead>
 
       <tbody>
-        <?php if(empty($tugas)): ?>
+        <?php if (empty($tugas)): ?>
           <tr>
             <td colspan="5" class="text-center text-muted py-4">No data</td>
           </tr>
         <?php endif; ?>
 
-        <?php $no=1; foreach($tugas as $t): ?>
+        <?php $no = 1;
+        foreach ($tugas as $t): ?>
           <?php
-            $desc = $t->deskripsi ?? '';
-            $desc = trim((string)$desc);
+          $desc = $t->deskripsi ?? '';
+          $desc = trim((string)$desc);
           ?>
           <tr class="text-nowrap">
             <td><?= $no++ ?></td>
@@ -107,7 +108,7 @@
 
             <td>
               <span class="badge text-bg-light border">
-                <?= htmlspecialchars($t->nama_divisi) ?>
+                <?= htmlspecialchars($t->nama_departemen) ?>
               </span>
             </td>
 
@@ -116,9 +117,9 @@
             </td>
 
             <td class="text-end">
-              <a href="<?= base_url('index.php/admin/tugas_delete/'.(int)$t->id) ?>"
-                 class="btn btn-sm btn-danger"
-                 onclick="return confirm('Hapus tugas ini?')">
+              <a href="<?= base_url('index.php/admin/tugas_delete/' . (int)$t->id) ?>"
+                class="btn btn-sm btn-danger"
+                onclick="return confirm('Hapus tugas ini?')">
                 <i class="fa-solid fa-trash me-1"></i>Delete
               </a>
             </td>

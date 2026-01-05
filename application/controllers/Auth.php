@@ -1,9 +1,11 @@
 <?php
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('BASEPATH') or exit('No direct script access allowed');
 
-class Auth extends CI_Controller {
+class Auth extends CI_Controller
+{
 
-  public function __construct() {
+  public function __construct()
+  {
     parent::__construct();
     $this->load->model('User_model');
     $this->load->library(['session']);
@@ -12,7 +14,8 @@ class Auth extends CI_Controller {
     // $this->load->database();
   }
 
-  public function index() {
+  public function index()
+  {
     // kalau sudah login, arahkan
     if ($this->session->userdata('logged_in')) {
       return $this->_redirect_by_role($this->session->userdata('role'));
@@ -20,7 +23,8 @@ class Auth extends CI_Controller {
     $this->load->view('auth/login');
   }
 
-  public function login() {
+  public function login()
+  {
     // wajib POST
     if (strtoupper($this->input->method()) !== 'POST') {
       show_error('Method Not Allowed', 405);
@@ -80,7 +84,7 @@ class Auth extends CI_Controller {
         'user_id'   => (int)$user->id,
         'nama'      => (string)$user->nama,
         'role'      => (string)$user->role,
-        'divisi_id' => (int)$user->divisi_id,
+        'departemen_id' => (int)$user->departemen_id,
       ]);
 
       // reset rate limit jika sukses
@@ -90,7 +94,6 @@ class Auth extends CI_Controller {
       // $this->_audit('LOGIN_SUCCESS', 'email='.$email);
 
       return $this->_redirect_by_role($user->role);
-
     } else {
       $this->_bump_attempt($key, $lastKey);
       // optional audit
@@ -101,7 +104,8 @@ class Auth extends CI_Controller {
     }
   }
 
-  public function logout() {
+  public function logout()
+  {
     // optional audit
     // $this->_audit('LOGOUT', 'user_id='.$this->session->userdata('user_id'));
 
@@ -109,14 +113,16 @@ class Auth extends CI_Controller {
     redirect('auth');
   }
 
-  private function _redirect_by_role($role) {
+  private function _redirect_by_role($role)
+  {
     $role = strtolower((string)$role);
     if ($role === 'admin')  return redirect('admin');
     if ($role === 'atasan') return redirect('atasan');
     return redirect('pegawai');
   }
 
-  private function _bump_attempt($key, $lastKey) {
+  private function _bump_attempt($key, $lastKey)
+  {
     $attempt = (int) $this->session->userdata($key);
     $attempt++;
     $this->session->set_userdata($key, $attempt);

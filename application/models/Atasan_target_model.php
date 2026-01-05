@@ -1,7 +1,8 @@
 <?php
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('BASEPATH') or exit('No direct script access allowed');
 
-class Atasan_target_model extends CI_Model {
+class Atasan_target_model extends CI_Model
+{
 
     private $table = 'atasan_target';
 
@@ -40,15 +41,15 @@ class Atasan_target_model extends CI_Model {
     }
 
     /**
-     * UPSERT GLOBAL (tanpa divisi)
+     * UPSERT GLOBAL (tanpa departemen)
      * berdasarkan periode
      */
     public function upsert($data)
     {
         if (empty($data['periode'])) return false;
 
-        // pastikan global (tanpa divisi)
-        $data['divisi_id'] = null;
+        // pastikan global (tanpa departemen)
+        $data['departemen_id'] = null;
 
         $exists = $this->db->get_where($this->table, [
             'periode' => $data['periode']
