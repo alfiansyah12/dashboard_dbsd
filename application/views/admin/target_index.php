@@ -1,16 +1,26 @@
 <?php
 // application/views/admin/target_index.php
-  
+$is_edit_target = $is_edit_target ?? false;
+$edit_target    = $edit_target ?? null;
+$is_edit_real   = $is_edit_real ?? false;
+$edit_real      = $edit_real ?? null;
+
+// Hitung akumulasi Target dari tabel kpi_targets
 $sumTarget = 0;
-$sumRealisasi = 0;
-$sumFee = 0;
-$sumVol = 0;
-foreach (($targets ?? []) as $t) {
-  $sumTarget    += (int)$t->target;
-  $sumRealisasi += (int)$t->realisasi;
-  $sumFee       += (int)($t->fee_base_income ?? 0);
-  $sumVol       += (int)($t->volume_of_agent ?? 0);
+foreach (($targets_kpi ?? []) as $tk) {
+  $sumTarget += (float)($tk->target_voa ?? 0) + (float)($tk->target_fbi ?? 0) + (float)($tk->target_transaksi ?? 0);
 }
+
+// Hitung akumulasi Realisasi dari tabel kpi_realizations
+$sumRealisasi = 0;
+$sumFBI = 0;
+$sumVoA = 0;
+foreach (($realizations ?? []) as $rl) {
+  $sumRealisasi += (float)($rl->real_voa ?? 0) + (float)($rl->real_fbi ?? 0) + (float)($rl->real_transaksi ?? 0);
+  $sumFBI += (float)($rl->real_fbi ?? 0);
+  $sumVoA += (float)($rl->real_voa ?? 0);
+}
+
 $avgProgress = ($sumTarget > 0) ? round(($sumRealisasi / $sumTarget) * 100, 2) : 0;
 
 $is_edit = !empty($edit);
@@ -24,7 +34,6 @@ $periode_val = $is_edit ? date('Y-m', strtotime($edit->periode)) : '';
 <div class="d-flex align-items-center justify-content-between mb-3">
   <div>
     <h3 class="mb-1">Target & Realisasi</h3>
-    <div class="text-muted small">Ringkasan KPI, grafik per periode, dan input data.</div>
   </div>
 
   <div class="d-flex gap-2">
@@ -48,91 +57,34 @@ $periode_val = $is_edit ? date('Y-m', strtotime($edit->periode)) : '';
   </div>
 <?php endif; ?>
 
-<!-- KPI -->
-<div class="row g-3 mb-3">
-  <div class="col-md-3">
-    <div class="card kpi-card">
-      <div class="card-body">
-        <div>
-          <div class="kpi-label">Total Target</div>
-          <div class="kpi-value"><?= (int)$sumTarget ?></div>
-          <div class="kpi-mini">Akumulasi target</div>
-        </div>
-        <div class="kpi-icon-soft"><i class="fa-solid fa-bullseye"></i></div>
-      </div>
+<div class="row g-3 mb-4 align-items-center">
+  <div class="col-md-6">
+    <div class="btn-group shadow-sm">
+      <a href="?mode=day" class="btn btn-sm <?= ($current_mode ?? 'day') == 'day' ? 'btn-primary' : 'btn-outline-primary' ?>">Harian</a>
+      <a href="?mode=week" class="btn btn-sm <?= ($current_mode ?? 'day') == 'week' ? 'btn-primary' : 'btn-outline-primary' ?>">Mingguan</a>
+      <a href="?mode=month" class="btn btn-sm <?= ($current_mode ?? 'day') == 'month' ? 'btn-primary' : 'btn-outline-primary' ?>">Bulanan</a>
+      <a href="?mode=year" class="btn btn-sm <?= ($current_mode ?? 'day') == 'year' ? 'btn-primary' : 'btn-outline-primary' ?>">Tahunan</a>
     </div>
   </div>
-
-  <div class="col-md-3">
-    <div class="card kpi-card kpi-success-soft">
-      <div class="card-body">
-        <div>
-          <div class="kpi-label">Total Realisasi</div>
-          <div class="kpi-value"><?= (int)$sumRealisasi ?></div>
-          <div class="kpi-mini">Akumulasi realisasi</div>
-        </div>
-        <div class="kpi-icon-soft"><i class="fa-solid fa-circle-check"></i></div>
-      </div>
-    </div>
-  </div>
-
-  <div class="col-md-3">
-    <div class="card kpi-card">
-      <div class="card-body">
-        <div>
-          <div class="kpi-label">Avg Progress</div>
-          <div class="kpi-value"><?= (float)$avgProgress ?>%</div>
-          <div class="kpi-mini">Rata-rata progres</div>
-        </div>
-        <div class="kpi-icon-soft"><i class="fa-solid fa-chart-line"></i></div>
-      </div>
-    </div>
-  </div>
-
-  <div class="col-md-3">
-    <div class="card kpi-card kpi-warning-soft">
-      <div class="card-body">
-        <div>
-          <div class="kpi-label">Fee / Volume</div>
-          <div class="kpi-value" style="font-size:18px;"><?= (int)$sumFee ?> / <?= (int)$sumVol ?></div>
-          <div class="kpi-mini">Total fee & volume</div>
-        </div>
-        <div class="kpi-icon-soft"><i class="fa-solid fa-coins"></i></div>
-      </div>
+  <div class="col-md-6 text-md-end">
+    <div class="d-inline-flex align-items-center gap-2">
+      <label class="small fw-bold text-muted">Tampilkan Grafik:</label>
+      <select id="chartFeatureSelect" class="form-select form-select-sm" style="width: 200px;">
+        <option value="fbi" selected>Fee Base Income (FBI)</option>
+        <option value="voa">Volume of Agent (VoA)</option>
+        <option value="trans">Transaksi</option>
+      </select>
     </div>
   </div>
 </div>
 
-<!-- Charts -->
-<div class="row g-3 mb-3">
-  <div class="col-lg-6">
-    <div class="card chart-card">
-      <div class="card-header">
-        <i class="fa-solid fa-chart-column me-2 text-primary"></i>
-        Target vs Realisasi (per periode)
-      </div>
-      <div class="card-body">
-        <div class="chart-box">
-          <canvas id="trCompare"></canvas>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="col-lg-6">
-    <div class="card chart-card">
-      <div class="card-header">
-        <i class="fa-solid fa-chart-area me-2 text-primary"></i>
-        Fee Base Income & Volume of Agent (per periode)
-      </div>
-      <div class="card-body">
-        <div class="chart-box">
-          <canvas id="feeVolCompare"></canvas>
-        </div>
-      </div>
-    </div>
+<div class="card shadow-sm border-0 mb-4">
+  <div class="card-header bg-white fw-bold"><i class="fa-solid fa-chart-line me-2 text-primary"></i> Grafik Performa <span id="chartTitle">FBI</span></div>
+  <div class="card-body">
+    <div style="height: 350px; width: 100%;"><canvas id="mainChart"></canvas></div>
   </div>
 </div>
+
 
 <!-- Form -->
 <div class="card shadow-sm border-0 mb-3">
@@ -154,243 +106,332 @@ $periode_val = $is_edit ? date('Y-m', strtotime($edit->periode)) : '';
     </div>
   </div>
 
-  <div class="card-body">
-    <form method="post" action="<?= $action_url ?>" class="row g-2 align-items-end">
-      <div class="col-md-2">
-        <label class="form-label small text-muted mb-1">Periode</label>
-        <input type="month" name="periode" class="form-control form-control-sm"
-          value="<?= htmlspecialchars($periode_val) ?>" required>
-      </div>
-
-      <div class="col-md-2">
-        <label class="form-label small text-muted mb-1">Target</label>
-        <input type="number" name="target" class="form-control form-control-sm" min="0" required
-          value="<?= $is_edit ? (int)$edit->target : '' ?>">
-      </div>
-
-      <div class="col-md-2">
-        <label class="form-label small text-muted mb-1">Realisasi</label>
-        <input type="number" name="realisasi" class="form-control form-control-sm" min="0" required
-          value="<?= $is_edit ? (int)$edit->realisasi : '' ?>">
-      </div>
-
-      <div class="col-md-2">
-        <label class="form-label small text-muted mb-1">Transaksi</label>
-        <input type="number" name="transaksi" class="form-control form-control-sm" min="0" required
-          value="<?= $is_edit ? (int)$edit->transaksi : '' ?>">
-      </div>
-
-      <div class="col-md-2">
-        <label class="form-label small text-muted mb-1">Fee Base Income</label>
-        <input type="number" name="fee_base_income" class="form-control form-control-sm" min="0" required
-          value="<?= $is_edit ? (int)$edit->fee_base_income : '' ?>">
-      </div>
-
-      <div class="col-md-2">
-        <label class="form-label small text-muted mb-1">Volume of Agent</label>
-        <input type="number" name="volume_of_agent" class="form-control form-control-sm" min="0" required
-          value="<?= $is_edit ? (int)$edit->volume_of_agent : '' ?>">
-      </div>
-
-      <div class="col-md-2">
-        <label class="form-label small text-muted mb-1">Note</label>
-        <input type="text" name="catatan" class="form-control form-control-sm"
-          value="<?= $is_edit ? htmlspecialchars($edit->catatan ?? '') : '' ?>">
-      </div>
-
-      <div class="col-12 d-flex gap-2">
-        <button class="btn btn-sm <?= $is_edit ? 'btn-primary' : 'btn-success' ?>">
-          <i class="fa-solid <?= $is_edit ? 'fa-floppy-disk' : 'fa-plus' ?> me-1"></i>
-          <?= $is_edit ? 'Update' : 'Save' ?>
-        </button>
-      </div>
-    </form>
+  <div class="card mb-4">
+    <div class="card-header bg-primary text-white">
+      <h6 class="mb-0">Form Input Target KPI</h6>
+    </div>
+    <div class="card-body">
+      <form method="post" action="<?= base_url('index.php/admin/save_target') ?>" class="row g-3 align-items-end">
+        <div class="col-md-3">
+          <label class="form-label small text-muted mb-1">Periode Target</label>
+          <input type="date" name="periode" class="form-control form-control-sm"
+            value="<?= $is_edit_target ? $edit_target->periode : date('Y-m-d') ?>" required>
+        </div>
+        <div class="col-md-2">
+          <label class="form-label small text-muted mb-1">Target VOA</label>
+          <input type="number" name="target_voa" class="form-control form-control-sm" value="<?= $is_edit_target ? $edit_target->target_voa : '' ?>">
+        </div>
+        <div class="col-md-2">
+          <label class="form-label small text-muted mb-1">Target FBI</label>
+          <input type="number" name="target_fbi" class="form-control form-control-sm" value="<?= $is_edit_target ? $edit_target->target_fbi : '' ?>">
+        </div>
+        <div class="col-md-2">
+          <label class="form-label small text-muted mb-1">Target Trans</label>
+          <input type="number" name="target_transaksi" class="form-control form-control-sm" value="<?= $is_edit_target ? $edit_target->target_transaksi : '' ?>">
+        </div>
+        <div class="col-md-3">
+          <label class="form-label small text-muted mb-1">Tgl Target Final</label>
+          <input type="date" name="tgl_target_final" class="form-control form-control-sm" value="<?= $is_edit_target ? $edit_target->tgl_target_final : '' ?>">
+        </div>
+        <div class="col-12 mt-2">
+          <button type="submit" class="btn btn-sm btn-primary">Simpan Target</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header bg-success text-white">
+      <h6 class="mb-0">Form Input Realisasi Harian</h6>
+    </div>
+    <div class="card-body">
+      <form method="post" action="<?= base_url('index.php/admin/save_realization') ?>" class="row g-3 align-items-end">
+        <div class="col-md-3">
+          <label class="form-label small text-muted mb-1">Tanggal Realisasi</label>
+          <input type="date" name="periode" class="form-control form-control-sm"
+            value="<?= $is_edit_real ? $edit_real->periode : date('Y-m-d') ?>" required>
+        </div>
+        <div class="col-md-2">
+          <label class="form-label small text-muted mb-1">Real VOA</label>
+          <input type="number" name="real_voa" class="form-control form-control-sm" value="<?= $is_edit_real ? $edit_real->real_voa : '' ?>">
+        </div>
+        <div class="col-md-2">
+          <label class="form-label small text-muted mb-1">Real FBI</label>
+          <input type="number" name="real_fbi" class="form-control form-control-sm" value="<?= $is_edit_real ? $edit_real->real_fbi : '' ?>">
+        </div>
+        <div class="col-md-2">
+          <label class="form-label small text-muted mb-1">Real Trans</label>
+          <input type="number" name="real_transaksi" class="form-control form-control-sm" value="<?= $is_edit_real ? $edit_real->real_transaksi : '' ?>">
+        </div>
+        <div class="col-md-3">
+          <label class="form-label small text-muted mb-1">Note / Catatan</label>
+          <textarea name="catatan" class="form-control form-control-sm" rows="1"><?= $is_edit_real ? htmlspecialchars($edit_real->catatan ?? '', ENT_QUOTES, 'UTF-8') : '' ?></textarea>
+        </div>
+        <div class="col-12 mt-2">
+          <button type="submit" class="btn btn-sm btn-success">Simpan Realisasi</button>
+        </div>
+      </form>
+    </div>
   </div>
 </div>
 
-<!-- Table -->
-<div class="card shadow-sm border-0 table-pro">
-  <div class="card-header d-flex align-items-center justify-content-between">
-    <div class="fw-semibold">
-      <i class="fa-solid fa-table me-2 text-primary"></i>Data Target & Realisasi
+<<div class="row">
+  <div class="col-md-5">
+    <div class="card shadow-sm border-0">
+      <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+        <h6 class="mb-0"><i class="fa-solid fa-bullseye me-2"></i>Daftar Target Bulanan</h6>
+      </div>
+      <div class="table-responsive" style="max-height: 400px;">
+        <table class="table table-sm table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Periode</th>
+              <th>Rincian Target (VoA / FBI / Trans)</th>
+              <th class="text-end">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <?php if (empty($targets_kpi)): ?>
+              <tr>
+                <td colspan="3" class="text-center py-3 text-muted small">Belum ada target diinput.</td>
+              </tr>
+            <?php endif; ?>
+            <?php foreach ($targets_kpi as $tk): ?>
+              <tr>
+                <td class="fw-bold text-nowrap"><?= date('M Y', strtotime($tk->periode)) ?></td>
+                <td>
+                  <div class="d-flex flex-column small">
+                    <span><b class="text-success">VoA:</b> <?= number_format($tk->target_voa, 0, ',', '.') ?></span>
+                    <span><b class="text-warning">FBI:</b> <?= number_format($tk->target_fbi, 0, ',', '.') ?></span>
+                    <span><b class="text-primary">Trans:</b> <?= number_format($tk->target_transaksi, 0, ',', '.') ?></span>
+                  </div>
+                </td>
+                <td class="text-end">
+                  <div class="btn-group">
+                    <a href="<?= base_url('index.php/admin/target?edit_target_id=' . (int)$tk->id) ?>" class="btn btn-xs btn-outline-warning">
+                      <i class="fa-solid fa-pen"></i>
+                    </a>
+                    <a href="<?= base_url('index.php/admin/delete_target/' . (int)$tk->id) ?>"
+                      class="btn btn-xs btn-outline-danger" onclick="return confirm('Hapus Target Bulanan ini?')">
+                      <i class="fa-solid fa-trash"></i>
+                    </a>
+                  </div>
+                </td>
+              </tr>
+            <?php endforeach; ?>
+          </tbody>
+        </table>
+      </div>
     </div>
-    <span class="badge text-bg-primary">Total: <?= isset($targets) ? count($targets) : 0 ?></span>
+  </div>
+  <div class="col-md-7 mb-3">
+    <div class="card shadow-sm border-0">
+      <div class="card-header bg-success text-white">
+        <h6 class="mb-0"><i class="fa-solid fa-clock-rotate-left me-2"></i>Riwayat Realisasi Harian</h6>
+      </div>
+      <div class="table-responsive" style="max-height: 400px;">
+        <table class="table table-sm table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr class="text-nowrap small text-center">
+              <th>Tanggal</th>
+              <th>Realisasi VoA</th>
+              <th>Realisasi FBI</th>
+              <th>Realisasi Trans</th>
+              <th>Note</th>
+            </tr>
+          </thead>
+          <tbody>
+            <?php if (empty($realizations)): ?>
+              <tr>
+                <td colspan="5" class="text-center py-3 text-muted small">Belum ada realisasi diinput.</td>
+              </tr>
+            <?php endif; ?>
+            <?php foreach ($realizations as $rl): ?>
+              <tr class="text-center small">
+                <td class="fw-semibold"><?= date('d/m/y', strtotime($rl->periode)) ?></td>
+                <td class="text-end pe-3"><?= number_format($rl->real_voa, 0, ',', '.') ?></td>
+                <td class="text-end pe-3"><?= number_format($rl->real_fbi, 0, ',', '.') ?></td>
+                <td class="text-end pe-3"><?= number_format($rl->real_transaksi, 0, ',', '.') ?></td>
+                <td class="text-start text-muted"><?= htmlspecialchars($rl->catatan ?? '-') ?></td>
+              </tr>
+            <?php endforeach; ?>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
   </div>
 
-  <div class="table-responsive">
-    <table class="table table-hover align-middle mb-0">
-      <thead>
-        <tr class="text-nowrap">
-          <th>Periode</th>
-          <th>Target</th>
-          <th>Realisasi</th>
-          <th>Transaksi</th>
-          <th>Fee Base Income</th>
-          <th>Volume of Agent</th>
-          <th>Progress</th>
-          <th>Gap</th>
-          <th>Note</th>
-          <th>Updated (WIB)</th>
-          <th class="text-end" style="width:190px;">Action</th>
-        </tr>
-      </thead>
+  <!-- Table -->
+  <div class="card shadow-sm mb-4 border-0 table-pro">
+    <div class="card-header d-flex align-items-center justify-content-between">
+      <div class="fw-semibold">
+        <i class="fa-solid fa-table me-2 text-primary"></i>Riwayat Target & Realisasi
+      </div>
+      <span class="badge text-bg-primary">Total Periode: <?= isset($targets) ? count($targets) : 0 ?></span>
+    </div>
 
-      <tbody>
-        <?php if (empty($targets)): ?>
-          <tr>
-            <td colspan="10" class="text-center text-muted py-4">Belum ada data.</td>
-          </tr>
-        <?php endif; ?>
-
-        <?php foreach ($targets as $t): ?>
-          <?php
-          $target = (int)$t->target;
-          $realisasi = (int)$t->realisasi;
-          $progress = ($target > 0) ? round(($realisasi / $target) * 100, 2) : null;
-          $gap = $realisasi - $target;
-
-          // progress badge (soft)
-          $progClass = 'warn';
-          if ($progress === null) $progClass = 'danger';
-          else if ($progress >= 100) $progClass = 'success';
-          else if ($progress >= 80) $progClass = 'warn';
-
-          // gap badge (soft)
-          $gapClass = ($gap >= 0) ? 'success' : 'danger';
-          ?>
+    <div class="table-responsive">
+      <table class="table table-bordered align-middle mb-0 text-center">
+        <thead class="table-light">
           <tr class="text-nowrap">
-            <td class="fw-semibold"><?= date('Y-m', strtotime($t->periode)) ?></td>
-            <td><?= $target ?></td>
-            <td><?= $realisasi ?></td>
-            <td><?= (int)($t->transaksi ?? 0) ?></td>
-            <td><?= (int)($t->fee_base_income ?? 0) ?></td>
-            <td><?= (int)($t->volume_of_agent ?? 0) ?></td>
-
-            <td>
-              <?php if ($progress === null): ?>
-                <span class="badge-soft danger">-</span>
-              <?php else: ?>
-                <span class="badge-soft <?= $progClass ?>"><?= $progress ?>%</span>
-              <?php endif; ?>
-            </td>
-
-            <td>
-              <?php if ($gap >= 0): ?>
-                <span class="badge-soft <?= $gapClass ?>">+<?= $gap ?></span>
-              <?php else: ?>
-                <span class="badge-soft <?= $gapClass ?>"><?= $gap ?></span>
-              <?php endif; ?>
-            </td>
-
-            <td class="text-wrap text-muted">
-              <?= !empty($t->catatan) ? htmlspecialchars($t->catatan) : '-' ?>
-            </td>
-
-            <td><?= !empty($t->updated_at) ? date('d-m-Y H:i', strtotime($t->updated_at)) : '-' ?></td>
-
-            <td class="text-end">
-              <div class="btn-group" role="group">
-                <a class="btn btn-sm btn-warning"
-                  href="<?= base_url('index.php/admin/target?edit_id=' . (int)$t->id) ?>">
-                  <i class="fa-solid fa-pen me-1"></i>Edit
-                </a>
-                <a class="btn btn-sm btn-danger"
-                  href="<?= base_url('index.php/admin/target_delete/' . (int)$t->id) ?>"
-                  onclick="return confirm('Yakin ingin menghapus periode <?= date('Y-m', strtotime($t->periode)) ?>?')">
-                  <i class="fa-solid fa-trash me-1"></i>Delete
-                </a>
-              </div>
-            </td>
+            <th style="width: 140px;">Tanggal</th>
+            <th style="width: 120px;">Kategori</th>
+            <th>Target</th>
+            <th>Realisasi</th>
+            <th>Progress</th>
+            <th>Gap Total</th>
+            <th>Tgl Target Final</th>
+            <th>Note</th>
+            <th style="width: 100px;">Action</th>
           </tr>
-        <?php endforeach; ?>
-      </tbody>
+        </thead>
 
+        <tbody>
+          <?php if (empty($targets)): ?>
+            <tr>
+              <td colspan="9" class="text-center text-muted py-4">Belum ada data realisasi.</td>
+            </tr>
+          <?php else: ?>
+            <?php foreach ($targets as $t): ?>
+              <?php
+              $m = date('Y-m', strtotime($t->periode));
+              // Mencari data target bulanan yang sesuai
+              $t_row = $this->db->get_where('kpi_targets', ['DATE_FORMAT(periode, "%Y-%m") =' => $m])->row();
+
+              $kategori = [
+                'Transaksi' => ['t' => ($t_row->target_transaksi ?? 0), 'r' => $t->real_transaksi],
+                'FBI'       => ['t' => ($t_row->target_fbi ?? 0),       'r' => $t->real_fbi],
+                'VoA'       => ['t' => ($t_row->target_voa ?? 0),       'r' => $t->real_voa]
+              ];
+
+              $first = true;
+              foreach ($kategori as $label => $val):
+                $target = (float)($val['t'] ?? 0);
+                $real   = (float)($val['r'] ?? 0);
+                $prog   = ($target > 0) ? round(($real / $target) * 100, 2) : 0;
+                $gap    = $real - $target;
+                $progClass = ($prog >= 100) ? 'success' : ($prog >= 80 ? 'warn' : 'danger');
+              ?>
+                <tr class="text-nowrap">
+                  <?php if ($first): ?>
+                    <td rowspan="3" class="fw-bold bg-white">
+                      <?= date('d M Y', strtotime($t->periode)) ?>
+                      <div class="small fw-normal text-muted mt-1">
+                        <i class="fa-regular fa-clock me-1"></i>
+                        <?= isset($t->created_at) ? date('H:i', strtotime($t->created_at)) : '-' ?> WIB
+                      </div>
+                    </td>
+                  <?php endif; ?>
+
+                  <td class="text-start ps-3 fw-semibold bg-light"><?= $label ?></td>
+                  <td class="text-end pe-3"><?= number_format($target, 0, ',', '.') ?></td>
+                  <td class="text-end pe-3"><?= number_format($real, 0, ',', '.') ?></td>
+                  <td><span class="badge-soft <?= $progClass ?>"><?= $prog ?>%</span></td>
+                  <td class="fw-bold <?= ($gap >= 0) ? 'text-success' : 'text-danger' ?>">
+                    <?= ($gap >= 0 ? '+' : '') . number_format($gap, 0, ',', '.') ?>
+                  </td>
+
+                  <?php if ($first): ?>
+                    <td rowspan="3">
+                      <?= (!empty($t_row) && isset($t_row->tgl_target_final)) ? date('d-m-Y', strtotime($t_row->tgl_target_final)) : '-' ?>
+                    </td>
+                    <td rowspan="3" class="text-wrap small text-muted">
+                      <?= htmlspecialchars($t->catatan ?? '-') ?> </td>
+                    <td rowspan="3">
+                      <div class="d-flex flex-column gap-1">
+                        <?php if ($t_row): ?>
+                          <a href="<?= base_url('index.php/admin/target?edit_id=' . (int)$t_row->id) ?>" class="btn btn-sm btn-warning">
+                            <i class="fa-solid fa-pen"></i> Edit Target
+                          </a>
+                        <?php endif; ?>
+
+                        <a href="<?= base_url('index.php/admin/delete_realization/' . (int)$t->id) ?>"
+                          class="btn btn-sm btn-danger"
+                          onclick="return confirm('Hapus realisasi tanggal <?= date('d/m/Y', strtotime($t->periode)) ?>?')">
+                          <i class="fa-solid fa-trash"></i> Delete Real
+                        </a>
+                      </div>
+                    </td>
+                  <?php endif; ?>
+                </tr>
+              <?php $first = false;
+              endforeach; ?>
+            <?php endforeach; ?>
+          <?php endif; ?>
+        </tbody>
+      </table>
+    </div>
     </table>
   </div>
-</div>
 
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    const labels = <?= $chart_labels ?? '[]' ?>;
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const labels = <?= $chart_labels ?? '[]' ?>;
+      const allData = {
+        fbi: <?= $c_fbi ?? '{"t":[],"r":[]}' ?>,
+        voa: <?= $c_voa ?? '{"t":[],"r":[]}' ?>,
+        trans: <?= $c_trans ?? '{"t":[],"r":[]}' ?>
+      };
 
-    const targetData = <?= $chart_target ?? '[]' ?>;
-    const realisasiData = <?= $chart_realisasi ?? '[]' ?>;
+      if (!labels.length) return;
 
-    const feeData = <?= $chart_fee ?? '[]' ?>;
-    const volData = <?= $chart_vol ?? '[]' ?>;
-
-    if (!labels.length) return;
-
-    new Chart(document.getElementById('trCompare'), {
-      type: 'bar',
-      data: {
-        labels,
-        datasets: [{
-            label: 'Target',
-            data: targetData
-          },
-          {
-            label: 'Realisasi',
-            data: realisasiData
-          }
-        ]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            position: 'top'
-          }
+      const featureInfo = {
+        fbi: {
+          lbl: 'FBI',
+          col: '#ffc107'
         },
-        scales: {
-          y: {
-            beginAtZero: true,
-            ticks: {
-              precision: 0
-            }
-          }
+        voa: {
+          lbl: 'VoA',
+          col: '#198754'
+        },
+        trans: {
+          lbl: 'Transaksi',
+          col: '#0d6efd'
         }
-      }
-    });
-
-    new Chart(document.getElementById('feeVolCompare'), {
-      type: 'line',
-      data: {
-        labels,
-        datasets: [{
-            label: 'Fee Base Income',
-            data: feeData,
-            tension: 0.25
-          },
-          {
-            label: 'Volume of Agent',
-            data: volData,
-            tension: 0.25
-          }
-        ]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            position: 'top'
-          }
-        },
-        interaction: {
-          mode: 'index',
-          intersect: false
-        },
-        scales: {
-          y: {
-            beginAtZero: true,
-            ticks: {
-              precision: 0
+      };
+      const ctx = document.getElementById('mainChart').getContext('2d');
+      let myChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+              label: 'Target',
+              data: allData.fbi.t,
+              borderColor: '#ccc',
+              fill: false,
+              tension: 0.3
+            },
+            {
+              label: 'Realisasi FBI',
+              data: allData.fbi.r,
+              backgroundColor: 'rgba(255, 193, 7, 0.2)',
+              borderColor: '#ffc107',
+              fill: true,
+              tension: 0.3
             }
-          }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false
         }
-      }
+      });
+
+      document.getElementById('chartFeatureSelect').addEventListener('change', function() {
+        const f = this.value;
+        document.getElementById('chartTitle').innerText = featureInfo[f].lbl;
+        myChart.data.datasets[0].data = allData[f].t;
+        myChart.data.datasets[1].data = allData[f].r;
+        myChart.data.datasets[1].label = 'Realisasi ' + featureInfo[f].lbl;
+        myChart.data.datasets[1].borderColor = featureInfo[f].col;
+        myChart.update();
+      });
+
+      document.getElementById('tableFeatureSelect').addEventListener('change', function() {
+        const val = this.value;
+        document.querySelectorAll('#targetTable tbody tr').forEach(tr => {
+          tr.style.display = (val === 'all' || tr.dataset.feature === val) ? '' : 'none';
+        });
+      });
     });
-  });
-</script>
+  </script>

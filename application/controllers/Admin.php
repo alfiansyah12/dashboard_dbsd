@@ -9,13 +9,17 @@ class Admin extends MY_Controller
     {
         parent::__construct();
 
+        date_default_timezone_set('Asia/Jakarta');
+
         $this->load->model('User_model');
         $this->load->model('Departemen_model');
         $this->load->model('Tugas_model');
 
-        $this->require_role('admin'); // ✅ semua method admin otomatis aman
-    }
+        // TAMBAHKAN BARIS INI
+        $this->load->model('Atasan_target_model');
 
+        $this->require_role('admin');
+    }
 
     /**
      * Render halaman admin (header + sidebar + content + footer)
@@ -90,10 +94,32 @@ class Admin extends MY_Controller
 
     public function tugas()
     {
+        // 1. Data Master Tugas
         $data['tugas']  = $this->Tugas_model->getAll();
         $data['departemen'] = $this->Departemen_model->getAll();
 
+        // 2. Data Monitoring Progress Pegawai
+        $this->db->select('pt.*, u.nama as nama_pegawai, t.nama_tugas, di.progress_nilai');
+        $this->db->from('pegawai_tugas pt');
+        $this->db->join('users u', 'u.id = pt.user_id');
+        $this->db->join('tugas t', 't.id = pt.tugas_id');
+        $this->db->join('dashboard_input di', 'di.pegawai_tugas_id = pt.id', 'left');
+        $data['assignments'] = $this->db->get()->result();
+
         $this->render('Kelola Tugas', 'admin/tugas', $data);
+    }
+
+    public function update_assignment_target()
+    {
+        $id = (int)$this->input->post('assignment_id');
+        $payload = [
+            'target_nilai'     => (int)$this->input->post('target_nilai'),
+            'deadline_tanggal' => $this->input->post('deadline_tanggal')
+        ];
+
+        $this->db->where('id', $id)->update('pegawai_tugas', $payload);
+        $this->session->set_flashdata('success', 'Target & Deadline berhasil diperbarui.');
+        redirect('admin/tugas');
     }
 
     public function tugas_store()
@@ -130,71 +156,114 @@ class Admin extends MY_Controller
     public function target()
     {
         date_default_timezone_set('Asia/Jakarta');
-        $this->load->model('Atasan_target_model');
+        $mode = $this->input->get('mode') ?: 'day';
 
-        $edit_id = (int)$this->input->get('edit_id', true);
+        // 1. Ambil data untuk Tabel Terpisah
+        $data['targets_kpi']  = $this->db->order_by('periode', 'DESC')->get('kpi_targets')->result();
+        $data['realizations'] = $this->db->order_by('periode', 'DESC')->get('kpi_realizations')->result();
+        $data['targets']      = $data['realizations']; // Untuk loop tabel riwayat harian
 
-        $data['targets'] = $this->Atasan_target_model->getAll();
-        $data['edit']    = null;
+        // 2. Ambil data Chart dari Model
+        $chart_raw = $this->Atasan_target_model->get_chart_data($mode);
 
-        if ($edit_id) {
-            $data['edit'] = $this->Atasan_target_model->getById($edit_id);
-            if (!$data['edit']) {
-                $this->session->set_flashdata('error', 'Data edit tidak ditemukan.');
-                redirect('admin/target');
-                return;
-            }
+        $labels = [];
+        $voa = ['t' => [], 'r' => []];
+        $fbi = ['t' => [], 'r' => []];
+        $trans = ['t' => [], 'r' => []];
+
+        foreach ($chart_raw as $row) {
+            if ($mode == 'day') $labels[] = date('d M', strtotime($row->label));
+            elseif ($mode == 'year') $labels[] = $row->label;
+            else $labels[] = $row->label;
+
+            $voa['t'][]   = $row->t_voa;
+            $voa['r'][]   = (float)$row->r_voa;
+            $fbi['t'][]   = $row->t_fbi;
+            $fbi['r'][]   = (float)$row->r_fbi;
+            $trans['t'][] = $row->t_trans;
+            $trans['r'][] = (float)$row->r_trans;
         }
 
-        // Chart data
-        $labels = $targetSeries = $realisasiSeries = $feeSeries = $volSeries = [];
+        $data['chart_labels'] = json_encode($labels);
+        $data['c_voa']        = json_encode($voa);
+        $data['c_fbi']        = json_encode($fbi);
+        $data['c_trans']      = json_encode($trans);
+        $data['current_mode'] = $mode;
 
-        foreach (($data['targets'] ?? []) as $t) {
-            $labels[]          = date('Y-m', strtotime($t->periode));
-            $targetSeries[]    = (int)$t->target;
-            $realisasiSeries[] = (int)$t->realisasi;
-            $feeSeries[]       = (int)($t->fee_base_income ?? 0);
-            $volSeries[]       = (int)($t->volume_of_agent ?? 0);
-        }
+        // Inisialisasi variabel agar tidak error di View
+        $edit_target_id = (int)$this->input->get('edit_target_id');
+        $data['is_edit_target'] = (bool)$edit_target_id;
+        $data['edit_target'] = $edit_target_id ? $this->db->get_where('kpi_targets', ['id' => $edit_target_id])->row() : null;
 
-        $data['chart_labels']    = json_encode($labels);
-        $data['chart_target']    = json_encode($targetSeries);
-        $data['chart_realisasi'] = json_encode($realisasiSeries);
-        $data['chart_fee']       = json_encode($feeSeries);
-        $data['chart_vol']       = json_encode($volSeries);
+        $edit_real_id = (int)$this->input->get('edit_real_id');
+        $data['is_edit_real'] = (bool)$edit_real_id;
+        $data['edit_real'] = $edit_real_id ? $this->db->get_where('kpi_realizations', ['id' => $edit_real_id])->row() : null;
 
         $this->render('Target & Realisasi', 'admin/target_index', $data);
     }
 
+    public function save_target()
+    {
+        $payload = [
+            'periode'          => $this->input->post('periode', true),
+            'target_voa'       => (int)$this->input->post('target_voa', true),
+            'target_fbi'       => (int)$this->input->post('target_fbi', true),
+            'target_transaksi' => (int)$this->input->post('target_transaksi', true),
+            'tgl_target_final' => $this->input->post('tgl_target_final', true),
+            'created_at'       => date('Y-m-d H:i:s')
+        ];
+        $this->db->insert('kpi_targets', $payload);
+        $this->session->set_flashdata('success', 'Target KPI Berhasil Disimpan.');
+        redirect('admin/target');
+    }
+
+    public function save_realization()
+    {
+        $payload = [
+            'periode'          => $this->input->post('periode', true),
+            'real_voa'         => (int)$this->input->post('real_voa', true),
+            'real_fbi'         => (int)$this->input->post('real_fbi', true),
+            'real_transaksi'   => (int)$this->input->post('real_transaksi', true),
+            'catatan'          => $this->input->post('catatan', true),
+            'created_at'       => date('Y-m-d H:i:s')
+        ];
+        $this->db->insert('kpi_realizations', $payload);
+        $this->session->set_flashdata('success', 'Realisasi Harian Berhasil Disimpan.');
+        redirect('admin/target');
+    }
     public function target_store()
     {
         date_default_timezone_set('Asia/Jakarta');
         $this->load->model('Atasan_target_model');
 
-        $periode = $this->input->post('periode', true); // YYYY-MM
+        $periode = $this->input->post('periode', true); // Format: YYYY-MM-DD
         if (!$periode) {
-            $this->session->set_flashdata('error', 'Periode wajib diisi.');
+            $this->session->set_flashdata('error', 'Tanggal wajib diisi.');
             redirect('admin/target');
             return;
         }
 
         $now = date('Y-m-d H:i:s');
 
+        // Sesuaikan payload dengan nama kolom baru di database
         $payload = [
-            'periode'          => $periode . '-01',
-            'target'           => (int)$this->input->post('target', true),
-            'realisasi'        => (int)$this->input->post('realisasi', true),
-            'transaksi'        => (int)$this->input->post('transaksi', true),
-            'fee_base_income'  => (int)$this->input->post('fee_base_income', true),
-            'volume_of_agent'  => (int)$this->input->post('volume_of_agent', true),
+            'periode'          => $periode, // Langsung gunakan input harian
+            'target_voa'       => (int)$this->input->post('target_voa', true),
+            'real_voa'         => (int)$this->input->post('real_voa', true),
+            'target_fbi'       => (int)$this->input->post('target_fbi', true),
+            'real_fbi'         => (int)$this->input->post('real_fbi', true),
+            'target_transaksi' => (int)$this->input->post('target_transaksi', true),
+            'real_transaksi'   => (int)$this->input->post('real_transaksi', true),
+            'tgl_target_final' => $this->input->post('tgl_target_final', true),
             'catatan'          => $this->input->post('catatan', true),
             'created_by'       => (int)$this->session->userdata('user_id'),
             'created_at'       => $now,
             'updated_at'       => $now,
         ];
 
-        $this->Atasan_target_model->insert($payload);
-        $this->session->set_flashdata('success', 'Target/Realisasi tersimpan.');
+        // Gunakan UPSERT agar jika tanggal sama sudah ada, maka otomatis UPDATE
+        $this->Atasan_target_model->upsert($payload);
+        $this->session->set_flashdata('success', 'Data KPI harian berhasil disimpan.');
         redirect('admin/target');
     }
 
@@ -210,28 +279,31 @@ class Admin extends MY_Controller
             return;
         }
 
-        $periode = $this->input->post('periode', true);
+        $periode = $this->input->post('periode', true); // Format: YYYY-MM-DD
         if (!$periode) {
-            $this->session->set_flashdata('error', 'Periode wajib diisi.');
+            $this->session->set_flashdata('error', 'Tanggal wajib diisi.');
             redirect('admin/target?edit_id=' . $id);
             return;
         }
 
         $now = date('Y-m-d H:i:s');
 
+        // Sesuaikan payload dengan nama kolom baru di database
         $payload = [
-            'periode'          => $periode . '-01',
-            'target'           => (int)$this->input->post('target', true),
-            'realisasi'        => (int)$this->input->post('realisasi', true),
-            'transaksi'        => (int)$this->input->post('transaksi', true),
-            'fee_base_income'  => (int)$this->input->post('fee_base_income', true),
-            'volume_of_agent'  => (int)$this->input->post('volume_of_agent', true),
+            'periode'          => $periode,
+            'target_voa'       => (int)$this->input->post('target_voa', true),
+            'real_voa'         => (int)$this->input->post('real_voa', true),
+            'target_fbi'       => (int)$this->input->post('target_fbi', true),
+            'real_fbi'         => (int)$this->input->post('real_fbi', true),
+            'target_transaksi' => (int)$this->input->post('target_transaksi', true),
+            'real_transaksi'   => (int)$this->input->post('real_transaksi', true),
+            'tgl_target_final' => $this->input->post('tgl_target_final', true),
             'catatan'          => $this->input->post('catatan', true),
             'updated_at'       => $now,
         ];
 
         $this->Atasan_target_model->updateById($id, $payload);
-        $this->session->set_flashdata('success', 'Data berhasil diupdate.');
+        $this->session->set_flashdata('success', 'Data harian berhasil diperbarui.');
         redirect('admin/target');
     }
 
@@ -280,5 +352,19 @@ class Admin extends MY_Controller
 
         $this->session->set_flashdata('success', 'Password berhasil di-reset untuk ' . $user->nama . '.');
         redirect('admin/user');
+    }
+
+    public function delete_target($id)
+    {
+        $this->db->where('id', (int)$id)->delete('kpi_targets');
+        $this->session->set_flashdata('success', 'Target berhasil dihapus.');
+        redirect('admin/target');
+    }
+
+    public function delete_realization($id)
+    {
+        $this->db->where('id', (int)$id)->delete('kpi_realizations');
+        $this->session->set_flashdata('success', 'Data realisasi berhasil dihapus.');
+        redirect('admin/target');
     }
 }

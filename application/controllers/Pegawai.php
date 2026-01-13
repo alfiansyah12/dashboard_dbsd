@@ -122,6 +122,7 @@ class Pegawai extends MY_Controller
             'activity'         => $this->input->post('activity', true),
             'pending_matters'  => $this->input->post('pending_matters', true),
             'close_the_path'   => $this->input->post('close_the_path', true),
+            'progress_nilai'   => (int)$this->input->post('progress_nilai', true),
             'updated_at'       => $now,
         ];
 
@@ -146,29 +147,28 @@ class Pegawai extends MY_Controller
         $this->session->set_flashdata('success', 'Data berhasil tersimpan.');
         redirect('pegawai/dashboard_list#top');
     }
-
     public function dashboard_list()
     {
         $user_id = (int)$this->session->userdata('user_id');
 
         $this->db->select('
-            pt.id as pegawai_tugas_id,
-            pt.tanggal_ambil,
-            pt.status,
-            t.nama_tugas,
-            di.activity,
-            di.pending_matters,
-            di.close_the_path,
-            di.updated_at,
-            di.created_at
-        ');
+        pt.id as pegawai_tugas_id,
+        pt.tanggal_ambil,
+        pt.status,
+        pt.target_nilai,
+        pt.deadline_tanggal,
+        t.nama_tugas,
+        di.activity,
+        di.progress_nilai,
+        di.updated_at,
+        di.created_at
+    ');
         $this->db->from('pegawai_tugas pt');
         $this->db->join('tugas t', 't.id = pt.tugas_id');
         $this->db->join('dashboard_input di', 'di.pegawai_tugas_id = pt.id', 'left');
         $this->db->where('pt.user_id', $user_id);
         $this->db->order_by('COALESCE(di.updated_at, di.created_at, pt.created_at)', 'DESC', false);
 
-        $data = [];
         $data['rows'] = $this->db->get()->result();
         $data['has_active_task'] = $this->hasActiveTask();
 

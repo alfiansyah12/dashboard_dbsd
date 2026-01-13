@@ -171,7 +171,7 @@
               <button class="nav-link active fw-bold" id="transaksi-tab" data-bs-toggle="tab" data-bs-target="#transaksi-pane" type="button" role="tab">Transaksi</button>
             </li>
             <li class="nav-item">
-              <button class="nav-link fw-bold" id="voa-tab" data-bs-toggle="tab" data-bs-target="#voa-pane" type="button" role="tab">VOA (Volume of Agent)</button>
+              <button class="nav-link fw-bold" id="voa-tab" data-bs-toggle="tab" data-bs-target="#voa-pane" type="button" role="tab">VOA (Volume of Account)</button>
             </li>
             <li class="nav-item">
               <button class="nav-link fw-bold" id="fbi-tab" data-bs-toggle="tab" data-bs-target="#fbi-pane" type="button" role="tab">FBI (Fee Base Income)</button>
@@ -214,14 +214,14 @@
                     <thead class="table-light">
                       <tr>
                         <th>Bulan</th>
-                        <th>Volume Agent</th>
+                        <th>Volume Account</th>
                       </tr>
                     </thead>
                     <tbody>
                       <?php foreach ($targets as $t): ?>
                         <tr>
                           <td><?= date('M Y', strtotime($t->periode)) ?></td>
-                          <td><?= rupiah($t->volume_of_agent ?? 0) ?></td>
+                          <td><?= rupiah($t->volume_of_account ?? 0) ?></td>
                         </tr>
                       <?php endforeach; ?>
                     </tbody>
@@ -443,7 +443,7 @@
                   <th>Realisasi</th>
                   <th>Transaksi</th>
                   <th>Fee Base Income</th>
-                  <th>Volume of Agent</th>
+                  <th>Volume of Account</th>
                   <th>Progress (%)</th>
                   <th>Gap</th>
                   <th>Note</th>
@@ -463,7 +463,7 @@
                     $realisasi = (int)($t->realisasi ?? 0);
                     $transaksi = (int)($t->transaksi ?? 0);
                     $feeBase   = (int)($t->fee_base_income ?? 0);
-                    $volume    = (int)($t->volume_of_agent ?? 0);
+                    $volume    = (int)($t->volume_of_account ?? 0);
 
                     $progress = ($target > 0) ? round(($realisasi / $target) * 100, 2) : null;
                     $gap      = $realisasi - $target;
@@ -599,7 +599,7 @@
             borderWidth: 2
           },
           {
-            label: 'Volume of Agent',
+            label: 'Volume of Account',
             data: volData,
             borderColor: '#198754',
             tension: 0.25,
@@ -636,7 +636,7 @@
       data: {
         labels: labels,
         datasets: [{
-          label: 'Volume of Agent',
+          label: 'Volume of Account',
           data: volData,
           backgroundColor: '#198754'
         }]

@@ -129,3 +129,69 @@
     </table>
   </div>
 </div>
+
+<div class="card shadow-sm border-0 mt-4">
+  <div class="card-header bg-white border-0 d-flex align-items-center justify-content-between">
+    <div class="fw-semibold">
+      <i class="fa-solid fa-chart-pie me-2 text-success"></i>Monitoring Progress Pegawai
+    </div>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead class="table-light">
+        <tr>
+          <th>Pegawai</th>
+          <th>Nama Tugas</th>
+          <th style="width: 250px;">Progress Bar</th>
+          <th>Set Target & Deadline</th>
+          <th class="text-end">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <?php if (empty($assignments)): ?>
+          <tr>
+            <td colspan="5" class="text-center text-muted py-4">Belum ada pegawai yang mengambil tugas.</td>
+          </tr>
+        <?php endif; ?>
+
+        <?php foreach ($assignments as $as):
+          $target  = (int)($as->target_nilai ?? 0);
+          $current = (int)($as->progress_nilai ?? 0);
+          $percent = ($target > 0) ? round(($current / $target) * 100, 0) : 0;
+          if ($percent > 100) $percent = 100;
+        ?>
+          <tr>
+            <td>
+              <div class="fw-bold"><?= htmlspecialchars($as->nama_pegawai) ?></div>
+            </td>
+            <td><?= htmlspecialchars($as->nama_tugas) ?></td>
+            <td>
+              <div class="progress" style="height: 12px;">
+                <div class="progress-bar progress-bar-striped <?= $percent >= 100 ? 'bg-success' : 'bg-primary' ?>"
+                  role="progressbar" style="width: <?= $percent ?>%"></div>
+              </div>
+              <small class="text-muted"><?= $current ?> / <?= $target ?> (<?= $percent ?>%)</small>
+            </td>
+            <form method="post" action="<?= base_url('index.php/admin/update_assignment_target') ?>">
+              <input type="hidden" name="assignment_id" value="<?= $as->id ?>">
+              <td>
+                <div class="d-flex gap-2">
+                  <input type="number" name="target_nilai" class="form-control form-control-sm"
+                    value="<?= $target ?>" placeholder="Target" style="width: 80px;">
+                  <input type="date" name="deadline_tanggal" class="form-control form-control-sm"
+                    value="<?= $as->deadline_tanggal ?>">
+                </div>
+              </td>
+              <td class="text-end">
+                <button type="submit" class="btn btn-sm btn-success">
+                  <i class="fa-solid fa-save"></i> Set
+                </button>
+              </td>
+            </form>
+          </tr>
+        <?php endforeach; ?>
+      </tbody>
+    </table>
+  </div>
+</div>
