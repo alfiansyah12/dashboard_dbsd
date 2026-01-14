@@ -23,13 +23,7 @@ class Pegawai extends MY_Controller
 
     public function index()
     {
-        $active = $this->Pegawai_tugas_model->getActiveByUser((int)$this->session->userdata('user_id'));
-        if ($active) {
-            redirect('pegawai/dashboard/' . $active->id);
-            return;
-        }
-
-        redirect('pegawai/pilih_tugas');
+        redirect('pegawai/dashboard_list');
     }
 
     public function pilih_tugas()
@@ -49,19 +43,30 @@ class Pegawai extends MY_Controller
     public function ambil_tugas()
     {
         $tugas_id = (int)$this->input->post('tugas_id', true);
+        $user_id  = (int)$this->session->userdata('user_id');
+
         if (!$tugas_id) {
             redirect('pegawai/pilih_tugas');
             return;
         }
 
-        $active = $this->Pegawai_tugas_model->getActiveByUser((int)$this->session->userdata('user_id'));
-        if ($active) {
-            redirect('pegawai/dashboard/' . $active->id);
+        // CEK: Apakah pegawai sudah mengambil tugas yang sama dengan status 'on going'
+        $check = $this->db->get_where('pegawai_tugas', [
+            'user_id'  => $user_id,
+            'tugas_id' => $tugas_id,
+            'status'   => 'on going'
+        ])->row();
+
+        if ($check) {
+            // Tampilkan alert jika tugas yang sama masih aktif
+            $this->session->set_flashdata('error', 'Anda sudah mengambil tugas ini dan statusnya masih On Going.');
+            redirect('pegawai/pilih_tugas');
             return;
         }
 
+        // Jika belum ada, masukkan tugas baru
         $this->db->insert('pegawai_tugas', [
-            'user_id'       => (int)$this->session->userdata('user_id'),
+            'user_id'       => $user_id,
             'tugas_id'      => $tugas_id,
             'tanggal_ambil' => date('Y-m-d'),
             'status'        => 'on going',
@@ -69,6 +74,7 @@ class Pegawai extends MY_Controller
         ]);
 
         $id = (int)$this->db->insert_id();
+        $this->session->set_flashdata('success', 'Tugas baru berhasil diambil.');
         redirect('pegawai/dashboard/' . $id);
     }
 
