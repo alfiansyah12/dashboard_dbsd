@@ -55,10 +55,14 @@
 
             $activity = !empty($r->activity) ? $r->activity : '-';
             $lastUpdate = '-';
+            $srcTz = new DateTimeZone('Asia/Jakarta'); // WIB
+
             if (!empty($r->updated_at)) {
-              $lastUpdate = date('d-m-Y H:i', strtotime($r->updated_at));
+              $dt = new DateTime($r->updated_at, $srcTz);
+              $lastUpdate = $dt->format('d-m-Y H:i');
             } elseif (!empty($r->created_at)) {
-              $lastUpdate = date('d-m-Y H:i', strtotime($r->created_at));
+              $dt = new DateTime($r->created_at, $srcTz);
+              $lastUpdate = $dt->format('d-m-Y H:i');
             }
             ?>
 

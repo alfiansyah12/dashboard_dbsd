@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jan 12, 2026 at 10:48 AM
+-- Generation Time: Jan 13, 2026 at 03:37 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.0.30
 
@@ -109,7 +109,7 @@ INSERT INTO `dashboard_input` (`id`, `pegawai_tugas_id`, `activity`, `pending_ma
 (13, 13, 'qwert123', 'asdf123123', 'qwer123123', '2025-12-23 13:03:58', '2025-12-23 13:03:31', 0),
 (14, 14, 'qweqw123', 'qeqweasdad123', 'zxczxcz123', '2025-12-23 13:05:31', '2025-12-23 13:05:31', 0),
 (15, 15, 'zxczxc', 'czasdasd', 'asdasdasd', '2025-12-23 13:06:18', '2025-12-23 13:06:18', 0),
-(16, 16, 'Monitoring partnership', '', '', '2026-01-12 09:09:16', '2026-01-04 18:34:51', 0);
+(16, 16, 'Monitoring partnership', '', '', '2026-01-13 03:29:49', '2026-01-04 18:34:51', 6);
 
 -- --------------------------------------------------------
 
@@ -155,7 +155,7 @@ INSERT INTO `goals` (`id`, `pegawai_tugas_id`, `goals`, `created_at`, `updated_a
 (3, 13, 'proses', '2025-12-23 13:03:31', '2025-12-23 13:03:58'),
 (4, 14, 'berhasil', '2025-12-23 13:05:31', '2025-12-23 13:05:31'),
 (5, 15, 'sadsd', '2025-12-23 13:06:18', '2025-12-23 13:06:18'),
-(6, 16, 'Monitoring partnership  dan agen', '2026-01-05 00:34:51', '2026-01-12 15:09:16');
+(6, 16, 'Monitoring partnership  dan agen', '2026-01-05 00:34:51', '2026-01-13 09:29:49');
 
 -- --------------------------------------------------------
 

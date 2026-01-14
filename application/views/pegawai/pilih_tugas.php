@@ -1,3 +1,10 @@
+<?php if ($this->session->flashdata('error')): ?>
+  <div class="alert alert-danger alert-dismissible fade show" role="alert">
+    <?= $this->session->flashdata('error') ?>
+    <button type="button" class="close" data-dismiss="alert"><span>&times;</span></button>
+  </div>
+<?php endif; ?>
+
 <h3>Choose Task Divison</h3>
 
 <div class="card">
