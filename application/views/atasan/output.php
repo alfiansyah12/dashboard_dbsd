@@ -286,92 +286,41 @@
               <thead class="table-light">
                 <tr>
                   <th>Employee</th>
-                  <th>Departement</th>
                   <th>Task</th>
-                  <th>Date</th>
-                  <th>Status</th>
-                  <th>Activity</th>
-                  <th>Pending</th>
-                  <th>Clear Path</th>
+                  <th>Progress Bar</th>
+                  <th>Activity Update</th>
                   <th>Assessment</th>
-                  <th class="text-nowrap">Last Update (WIB)</th>
+                  <th>Last Update</th>
                 </tr>
               </thead>
               <tbody>
-
-                <?php if (empty($rows)): ?>
+                <?php foreach ($rows as $r):
+                  $target = (int)($r->target_nilai ?? 0);
+                  $current = (int)($r->progress_nilai ?? 0);
+                  $percent = ($target > 0) ? round(($current / $target) * 100, 0) : 0;
+                  if ($percent > 100) $percent = 100;
+                ?>
                   <tr>
-                    <td colspan="10" class="text-center text-muted py-4">Belum ada aktivitas pegawai</td>
-                  </tr>
-                <?php endif; ?>
-
-                <?php foreach ($rows as $r): ?>
-                  <?php
-                  $isTerminated = ($r->status === 'terminated');
-                  $badge =
-                    $r->status === 'done' ? 'bg-success' : ($r->status === 'on going' ? 'bg-primary' : ($r->status === 'terminated' ? 'bg-danger' : 'bg-secondary'));
-                  ?>
-                  <tr>
-                    <td class="fw-bold"><?= htmlspecialchars($r->pegawai_nama) ?></td>
-                    <td><?= htmlspecialchars($r->nama_departemen) ?></td>
-                    <td><?= htmlspecialchars($r->nama_tugas) ?></td>
-                    <td class="text-nowrap"><?= htmlspecialchars($r->tanggal_ambil) ?></td>
-
-                    <td><span class="badge <?= $badge ?>"><?= htmlspecialchars($r->status) ?></span></td>
-
-                    <td><?= !empty($r->activity) ? htmlspecialchars($r->activity) : '<span class="text-muted">-</span>' ?></td>
-                    <td><?= !empty($r->pending_matters) ? htmlspecialchars($r->pending_matters) : '<span class="text-muted">-</span>' ?></td>
-                    <td><?= !empty($r->close_the_path) ? htmlspecialchars($r->close_the_path) : '<span class="text-muted">-</span>' ?></td>
-
-                    <!-- ASSESSMENT -->
-                    <td style="min-width: 210px;">
-                      <form method="post" action="<?= base_url('index.php/atasan/review_store') ?>" class="review-form">
-                        <input type="hidden" name="pegawai_tugas_id" value="<?= (int)$r->pegawai_tugas_id ?>">
-                        <input type="hidden" name="departemen_id" value="<?= htmlspecialchars((string)$filter_departemen_id) ?>">
-
-                        <div class="d-flex gap-3">
-                          <div class="form-check">
-                            <input class="form-check-input review-radio" type="radio" name="review_status" value="done"
-                              <?= ($r->review_status == 'done' ? 'checked' : '') ?>
-                              <?= ($isTerminated ? 'disabled' : '') ?> required>
-                            <label class="form-check-label">Done</label>
-                          </div>
-
-                          <div class="form-check">
-                            <input class="form-check-input review-radio" type="radio" name="review_status" value="not_yet"
-                              <?= ($r->review_status == 'not_yet' ? 'checked' : '') ?>
-                              <?= ($isTerminated ? 'disabled' : '') ?>>
-                            <label class="form-check-label">Not yet</label>
-                          </div>
-                        </div>
-
-                        <div class="d-flex gap-2 mt-2">
-                          <button type="submit"
-                            class="btn btn-sm btn-primary review-save"
-                            <?= ($isTerminated ? 'disabled' : '') ?>
-                            disabled>
-                            <i class="bi bi-save"></i> Save
-                          </button>
-
-                          <?php if (!$isTerminated): ?>
-                            <a href="<?= base_url('index.php/atasan/terminate/' . $r->pegawai_tugas_id) . ($filter_departemen_id ? '?departemen_id=' . $filter_departemen_id : '') ?>"
-                              class="btn btn-sm btn-outline-danger"
-                              onclick="return confirm('Yakin ingin terminate tugas ini?')">
-                              <i class="bi bi-x-circle"></i> Terminate
-                            </a>
-                          <?php else: ?>
-                            <span class="badge bg-danger align-self-center">TERMINATED</span>
-                          <?php endif; ?>
-                        </div>
-                      </form>
+                    <td><b><?= htmlspecialchars($r->pegawai_nama) ?></b><br><small class="text-muted"><?= $r->nama_departemen ?></small></td>
+                    <td><?= htmlspecialchars($r->nama_tugas) ?> <br> <span class="badge bg-<?= $r->status == 'done' ? 'success' : 'primary' ?> small"><?= $r->status ?></span></td>
+                    <td>
+                      <div class="progress" style="height: 10px; min-width: 150px;">
+                        <div class="progress-bar progress-bar-striped <?= $percent >= 100 ? 'bg-success' : 'bg-primary' ?>"
+                          style="width: <?= $percent ?>%"></div>
+                      </div>
+                      <small class="fw-bold"><?= $current ?>/<?= $target ?> (<?= $percent ?>%)</small>
+                      <?php if ($r->deadline_tanggal): ?>
+                        <div class="small text-danger">Due: <?= date('d/m/y', strtotime($r->deadline_tanggal)) ?></div>
+                      <?php endif; ?>
                     </td>
-
-                    <td class="text-nowrap">
-                      <?= !empty($r->last_update) ? date('d-m-Y H:i', strtotime($r->last_update)) : '-' ?>
+                    <td>
+                      <div class="small text-wrap" style="max-width: 250px;"><?= $r->activity ?: '-' ?></div>
                     </td>
+                    <td>
+                    </td>
+                    <td class="text-nowrap small"><?= date('d-m-Y H:i', strtotime($r->last_update)) ?> WIB</td>
                   </tr>
                 <?php endforeach; ?>
-
               </tbody>
             </table>
           </div>
@@ -501,6 +450,10 @@
               </tbody>
             </table>
           </div>
+        </div>
+        <div class="card-footer bg-white d-flex justify-content-between align-items-center">
+          <div class="small text-muted">Data Riwayat Transaksi Kantor</div>
+          <nav><?= $pagination_links ?? '' ?></nav>
         </div>
       </div>
 

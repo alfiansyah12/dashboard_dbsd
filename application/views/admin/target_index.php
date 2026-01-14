@@ -362,6 +362,14 @@ $periode_val = $is_edit ? date('Y-m', strtotime($edit->periode)) : '';
       </table>
     </div>
     </table>
+    <div class="card-footer bg-white d-flex justify-content-between align-items-center">
+      <div class="small text-muted">
+        Menampilkan <?= count($targets) ?> data terbaru.
+      </div>
+      <nav>
+        <?= $pagination_links ?? '' ?>
+      </nav>
+    </div>
   </div>
 
   <script>
@@ -397,7 +405,8 @@ $periode_val = $is_edit ? date('Y-m', strtotime($edit->periode)) : '';
           datasets: [{
               label: 'Target',
               data: allData.fbi.t,
-              borderColor: '#ccc',
+              borderColor: '#ff0000',
+              backgroundColor: 'rgb(255, 243, 251)',
               fill: false,
               tension: 0.3
             },

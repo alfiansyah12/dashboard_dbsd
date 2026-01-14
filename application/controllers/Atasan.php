@@ -19,21 +19,25 @@ class Atasan extends MY_Controller
      *  ========================= */
     public function index()
     {
-        // 1. Ambil Parameter Filter dan Mode
+        $this->load->library('pagination');
         $filter_departemen_id = $this->input->get('departemen_id', true);
         $filter_departemen_id = ($filter_departemen_id !== null && $filter_departemen_id !== '') ? (int)$filter_departemen_id : null;
-
-        // Default mode adalah 'day' (Harian)
         $mode = $this->input->get('mode') ?: 'day';
 
-        // =======================
-        // TABEL MONITORING & GOALS
-        // =======================
-        // (Gunakan Query Builder untuk mengambil data aktivitas pegawai)
+        // 1. QUERY MONITORING (Pastikan alias pegawai_tugas_id dan kolom target/progress ada)
         $this->db->select("
-        pt.id as pegawai_tugas_id, pt.tanggal_ambil, pt.status,
-        u.nama as pegawai_nama, t.nama_tugas, d.nama_departemen,
-        di.activity, di.pending_matters, di.close_the_path,
+        pt.id as pegawai_tugas_id, 
+        pt.tanggal_ambil, 
+        pt.status,
+        pt.target_nilai, 
+        pt.deadline_tanggal,
+        u.nama as pegawai_nama, 
+        t.nama_tugas, 
+        d.nama_departemen,
+        di.activity, 
+        di.pending_matters, 
+        di.close_the_path, 
+        di.progress_nilai,
         COALESCE(di.updated_at, di.created_at, pt.created_at) as last_update,
         ar.review_status
     ", false);
@@ -50,65 +54,56 @@ class Atasan extends MY_Controller
         $this->db->order_by('last_update', 'DESC');
         $data['rows'] = $this->db->get()->result();
 
-        // =======================
-        // AGREGASI DATA UNTUK CHART
-        // =======================
-        // Memanggil fungsi agregasi yang ada di model
-        $aggregated_data = $this->Atasan_target_model->get_aggregated_data($mode, $filter_departemen_id);
+        // 2. PAGINATION RIWAYAT KPI (Samakan dengan Admin/Pegawai)
+        $config['base_url'] = base_url('index.php/atasan/index');
+        $config['total_rows'] = $this->db->count_all('kpi_realizations');
+        $config['per_page'] = 10;
+        $config['uri_segment'] = 3;
+        $config['reuse_query_string'] = TRUE;
 
+        // Styling Pagination Kotak Biru
+        $config['full_tag_open'] = '<ul class="pagination pagination-sm m-0 justify-content-end">';
+        $config['full_tag_close'] = '</ul>';
+        $config['num_tag_open'] = '<li class="page-item">';
+        $config['num_tag_close'] = '</li>';
+        $config['cur_tag_open'] = '<li class="page-item active"><a class="page-link" href="#">';
+        $config['cur_tag_close'] = '</a></li>';
+        $config['attributes'] = array('class' => 'page-link');
+
+        $this->pagination->initialize($config);
+        $page = ($this->uri->segment(3)) ? $this->uri->segment(3) : 0;
+
+        $data['targets'] = $this->db->limit($config['per_page'], $page)
+            ->order_by('periode', 'DESC')
+            ->get('kpi_realizations')->result();
+        $data['pagination_links'] = $this->pagination->create_links();
+
+        // 3. LOGIKA CHART (Samakan dengan Admin)
+        $chart_raw = $this->Atasan_target_model->get_chart_data($mode);
         $labels = [];
-        $voa_series = ['t' => [], 'r' => []];
-        $fbi_series = ['t' => [], 'r' => []];
-        $trans_series = ['t' => [], 'r' => []];
+        $voa = ['t' => [], 'r' => []];
+        $fbi = ['t' => [], 'r' => []];
+        $trans = ['t' => [], 'r' => []];
 
-        // Variabel untuk KPI Summary
-        $sumTarget = 0;
-        $sumRealisasi = 0;
-        $sumFee = 0;
-        $sumVol = 0;
-
-        foreach ($aggregated_data as $row) {
-            // Format Label berdasarkan Mode
+        foreach ($chart_raw as $row) {
             $labels[] = ($mode == 'day') ? date('d M', strtotime($row->label)) : $row->label;
-
-            // Data Series (Target & Realisasi)
-            $voa_series['t'][]   = (int)$row->t_voa;
-            $voa_series['r'][]   = (int)$row->r_voa;
-            $fbi_series['t'][]   = (int)$row->t_fbi;
-            $fbi_series['r'][]   = (int)$row->r_fbi;
-            $trans_series['t'][] = (int)$row->t_trans;
-            $trans_series['r'][] = (int)$row->r_trans;
-
-            // Hitung Total untuk KPI Card
-            $sumTarget    += ($row->t_voa + $row->t_fbi + $row->t_trans);
-            $sumRealisasi += ($row->r_voa + $row->r_fbi + $row->r_trans);
-            $sumFee       += $row->r_fbi;
-            $sumVol       += $row->r_voa;
+            $voa['t'][]   = $row->t_voa;
+            $voa['r'][]   = (float)$row->r_voa;
+            $fbi['t'][]   = $row->t_fbi;
+            $fbi['r'][]   = (float)$row->r_fbi;
+            $trans['t'][] = $row->t_trans;
+            $trans['r'][] = (float)$row->r_trans;
         }
 
-        // Persiapan Data Kirim ke View
+        $data['chart_labels'] = json_encode($labels);
+        $data['c_voa']        = json_encode($voa);
+        $data['c_fbi']        = json_encode($fbi);
+        $data['c_trans']      = json_encode($trans);
         $data['current_mode'] = $mode;
         $data['departemen']   = $this->Departemen_model->getAll();
         $data['filter_departemen_id'] = $filter_departemen_id;
 
-        // JSON Encode untuk Chart.js
-        $data['chart_labels'] = json_encode($labels);
-        $data['voa_json']     = json_encode($voa_series);
-        $data['fbi_json']     = json_encode($fbi_series);
-        $data['trans_json']   = json_encode($trans_series);
-
-        // Data Summary
-        $data['sumTarget']    = $sumTarget;
-        $data['sumRealisasi'] = $sumRealisasi;
-        $data['sumFee']       = $sumFee;
-        $data['sumVol']       = $sumVol;
-        $data['avgProgress']  = ($sumTarget > 0) ? round(($sumRealisasi / $sumTarget) * 100, 2) : 0;
-
-        // Data Goals Table
-        $data['goals_rows']   = $this->Goals_model->getAllForAtasan($filter_departemen_id);
-
-        // Mengirim data ke View output.php yang berisi Tab Transaksi/VoA/FBI
-        $this->load->view('atasan/output', $data);
+        $this->load->view('atasan/dashboard', $data);
     }
 
     /** =========================
@@ -188,35 +183,48 @@ class Atasan extends MY_Controller
     {
         $pegawai_tugas_id = (int)$this->input->post('pegawai_tugas_id', true);
         $review_status    = $this->input->post('review_status', true);
-        $departemen_id_raw    = $this->input->post('departemen_id', true);
+        $pending_matters  = $this->input->post('pending_matters', true); // Input baru
+        $close_the_path   = $this->input->post('close_the_path', true);  // Input baru
 
-        if (!$pegawai_tugas_id || !in_array($review_status, ['done', 'not_yet'], true)) {
+        if (!$pegawai_tugas_id) {
             redirect('atasan');
             return;
         }
 
-        $departemen_id = ($departemen_id_raw !== null && $departemen_id_raw !== '') ? (int)$departemen_id_raw : null;
-
-        $data = [
+        // 1. Simpan/Update Assessment di tabel atasan_review
+        $review_data = [
             'pegawai_tugas_id' => $pegawai_tugas_id,
             'review_status'    => $review_status,
             'review_by'        => (int)$this->session->userdata('user_id'),
             'review_at'        => date('Y-m-d H:i:s'),
         ];
 
-        $exists = $this->db->get_where('atasan_review', ['pegawai_tugas_id' => $pegawai_tugas_id])->row();
-        if ($exists) {
-            $this->db->where('pegawai_tugas_id', $pegawai_tugas_id)->update('atasan_review', $data);
+        $exists_review = $this->db->get_where('atasan_review', ['pegawai_tugas_id' => $pegawai_tugas_id])->row();
+        if ($exists_review) {
+            $this->db->where('pegawai_tugas_id', $pegawai_tugas_id)->update('atasan_review', $review_data);
         } else {
-            $this->db->insert('atasan_review', $data);
+            $this->db->insert('atasan_review', $review_data);
         }
 
-        $url = 'atasan';
-        if ($departemen_id !== null) $url .= '?departemen_id=' . $departemen_id;
+        // 2. Update Pending & Clear the Path di tabel dashboard_input
+        $input_data = [
+            'pending_matters' => $pending_matters,
+            'close_the_path'  => $close_the_path,
+            'updated_at'      => date('Y-m-d H:i:s')
+        ];
 
+        $exists_input = $this->db->get_where('dashboard_input', ['pegawai_tugas_id' => $pegawai_tugas_id])->row();
+        if ($exists_input) {
+            $this->db->where('pegawai_tugas_id', $pegawai_tugas_id)->update('dashboard_input', $input_data);
+        } else {
+            // Jika pegawai belum pernah menginput aktivitas sama sekali
+            $input_data['pegawai_tugas_id'] = $pegawai_tugas_id;
+            $input_data['created_at']       = date('Y-m-d H:i:s');
+            $this->db->insert('dashboard_input', $input_data);
+        }
 
-        $this->session->set_flashdata('success', 'Assessment berhasil disimpan.');
-        redirect($url);
+        $this->session->set_flashdata('success', 'Update Monitoring & Assessment berhasil disimpan.');
+        redirect('atasan');
     }
 
     public function target_store()
