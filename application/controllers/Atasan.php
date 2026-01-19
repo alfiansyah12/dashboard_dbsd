@@ -84,6 +84,7 @@ class Atasan extends MY_Controller
         $voa = ['t' => [], 'r' => []];
         $fbi = ['t' => [], 'r' => []];
         $trans = ['t' => [], 'r' => []];
+        $agen = ['t' => [], 'r' => []];
 
         foreach ($chart_raw as $row) {
             $labels[] = ($mode == 'day') ? date('d M', strtotime($row->label)) : $row->label;
@@ -93,12 +94,16 @@ class Atasan extends MY_Controller
             $fbi['r'][]   = (float)$row->r_fbi;
             $trans['t'][] = $row->t_trans;
             $trans['r'][] = (float)$row->r_trans;
+            $agen['t'][]  = $row->t_agen;
+            $agen['r'][]  = (float)$row->r_agen;
         }
 
         $data['chart_labels'] = json_encode($labels);
         $data['c_voa']        = json_encode($voa);
         $data['c_fbi']        = json_encode($fbi);
         $data['c_trans']      = json_encode($trans);
+        $data['c_agen']       = json_encode($agen); 
+
         $data['current_mode'] = $mode;
         $data['departemen']   = $this->Departemen_model->getAll();
         $data['filter_departemen_id'] = $filter_departemen_id;
@@ -291,7 +296,8 @@ class Atasan extends MY_Controller
         $this->db->select("
         SUM(target_voa) as t_voa, SUM(real_voa) as r_voa,
         SUM(target_fbi) as t_fbi, SUM(real_fbi) as r_fbi,
-        SUM(target_transaksi) as t_trans, SUM(real_transaksi) as r_trans
+        SUM(target_transaksi) as t_trans, SUM(real_transaksi) as r_trans,
+        SUM(target_agen) as t_agen, SUM(real_agen) as r_agen
     ");
 
         $this->db->from($this->table);

@@ -202,6 +202,7 @@ class Admin extends MY_Controller
         $voa = ['t' => [], 'r' => []];
         $fbi = ['t' => [], 'r' => []];
         $trans = ['t' => [], 'r' => []];
+        $agen = ['t' => [], 'r' => []];
 
         foreach ($chart_raw as $row) {
             if ($mode == 'day') $labels[] = date('d M', strtotime($row->label));
@@ -214,12 +215,15 @@ class Admin extends MY_Controller
             $fbi['r'][]   = (float)$row->r_fbi;
             $trans['t'][] = $row->t_trans;
             $trans['r'][] = (float)$row->r_trans;
+            $agen['t'][]  = $row->t_agen;
+            $agen['r'][]  = (float)$row->r_agen;
         }
 
         $data['chart_labels'] = json_encode($labels);
         $data['c_voa']        = json_encode($voa);
         $data['c_fbi']        = json_encode($fbi);
         $data['c_trans']      = json_encode($trans);
+        $data['c_agen']  = json_encode($agen);
         $data['current_mode'] = $mode;
 
         // Inisialisasi variabel agar tidak error di View
@@ -237,30 +241,30 @@ class Admin extends MY_Controller
     public function save_target()
     {
         $payload = [
-            'periode'          => $this->input->post('periode', true),
-            'target_voa'       => (int)$this->input->post('target_voa', true),
-            'target_fbi'       => (int)$this->input->post('target_fbi', true),
-            'target_transaksi' => (int)$this->input->post('target_transaksi', true),
-            'tgl_target_final' => $this->input->post('tgl_target_final', true),
-            'created_at'       => date('Y-m-d H:i:s')
+            'periode' => $this->input->post('periode', true),
+            'target_voa' => (int)$this->input->post('target_voa'),
+            'target_fbi' => (int)$this->input->post('target_fbi'),
+            'target_transaksi' => (int)$this->input->post('target_transaksi'),
+            'target_agen' => (int)$this->input->post('target_agen'),
+            'tgl_target_final' => $this->input->post('tgl_target_final'),
+            'created_at' => date('Y-m-d H:i:s')
         ];
         $this->db->insert('kpi_targets', $payload);
-        $this->session->set_flashdata('success', 'Target KPI Berhasil Disimpan.');
         redirect('admin/target');
     }
 
     public function save_realization()
     {
         $payload = [
-            'periode'          => $this->input->post('periode', true),
-            'real_voa'         => (int)$this->input->post('real_voa', true),
-            'real_fbi'         => (int)$this->input->post('real_fbi', true),
-            'real_transaksi'   => (int)$this->input->post('real_transaksi', true),
-            'catatan'          => $this->input->post('catatan', true),
-            'created_at'       => date('Y-m-d H:i:s')
+            'periode' => $this->input->post('periode', true),
+            'real_voa' => (int)$this->input->post('real_voa'),
+            'real_fbi' => (int)$this->input->post('real_fbi'),
+            'real_transaksi' => (int)$this->input->post('real_transaksi'),
+            'real_agen' => (int)$this->input->post('real_agen'),
+            'catatan' => $this->input->post('catatan', true),
+            'created_at' => date('Y-m-d H:i:s')
         ];
         $this->db->insert('kpi_realizations', $payload);
-        $this->session->set_flashdata('success', 'Realisasi Harian Berhasil Disimpan.');
         redirect('admin/target');
     }
     public function target_store()
@@ -286,6 +290,8 @@ class Admin extends MY_Controller
             'real_fbi'         => (int)$this->input->post('real_fbi', true),
             'target_transaksi' => (int)$this->input->post('target_transaksi', true),
             'real_transaksi'   => (int)$this->input->post('real_transaksi', true),
+            'target_agen'       => (int)$this->input->post('target_agen', true),
+            'real_agen'         => (int)$this->input->post('real_agen', true),
             'tgl_target_final' => $this->input->post('tgl_target_final', true),
             'catatan'          => $this->input->post('catatan', true),
             'created_by'       => (int)$this->session->userdata('user_id'),
@@ -329,6 +335,8 @@ class Admin extends MY_Controller
             'real_fbi'         => (int)$this->input->post('real_fbi', true),
             'target_transaksi' => (int)$this->input->post('target_transaksi', true),
             'real_transaksi'   => (int)$this->input->post('real_transaksi', true),
+            'target_agen'       => (int)$this->input->post('target_agen', true),
+            'real_agen'         => (int)$this->input->post('real_agen', true),
             'tgl_target_final' => $this->input->post('tgl_target_final', true),
             'catatan'          => $this->input->post('catatan', true),
             'updated_at'       => $now,

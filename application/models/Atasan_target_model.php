@@ -83,6 +83,7 @@ class Atasan_target_model extends CI_Model
         SUM(target_voa) as t_voa, SUM(real_voa) as r_voa,
         SUM(target_fbi) as t_fbi, SUM(real_fbi) as r_fbi,
         SUM(target_transaksi) as t_trans, SUM(real_transaksi) as r_trans,
+        SUM(target_agen) as t_agen, SUM(real_agen) as r_agen,
         MAX(updated_at) as last_update
     ");
 
@@ -108,7 +109,7 @@ class Atasan_target_model extends CI_Model
             $this->db->group_by("periode");
         }
 
-        $this->db->select("SUM(real_voa) as r_voa, SUM(real_fbi) as r_fbi, SUM(real_transaksi) as r_trans");
+        $this->db->select("SUM(real_voa) as r_voa, SUM(real_fbi) as r_fbi, SUM(real_transaksi) as r_trans, SUM(real_agen) as r_agen");
         $this->db->from('kpi_realizations');
         $this->db->order_by('periode', 'ASC');
         $realizations = $this->db->get()->result();
@@ -118,7 +119,7 @@ class Atasan_target_model extends CI_Model
             $month = date('Y-m', strtotime($r->label));
             // FIX: Tambahkan operator '=' pada key array
             $target = $this->db->get_where('kpi_targets', ['DATE_FORMAT(periode, "%Y-%m") =' => $month])->row();
-
+            $r->t_agen  = (float)($target->target_agen ?? 0);
             $r->t_voa   = (float)($target->target_voa ?? 0);
             $r->t_fbi   = (float)($target->target_fbi ?? 0);
             $r->t_trans = (float)($target->target_transaksi ?? 0);

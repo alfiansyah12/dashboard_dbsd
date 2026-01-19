@@ -214,11 +214,14 @@ class Pegawai extends MY_Controller
             $fbi['r'][] = (float)$row->r_fbi;
             $trans['t'][] = $row->t_trans;
             $trans['r'][] = (float)$row->r_trans;
+            $agen['t'][] = $row->t_agen;
+            $agen['r'][] = (float)$row->r_agen;
         }
         $data['chart_labels'] = json_encode($labels);
         $data['c_voa'] = json_encode($voa);
         $data['c_fbi'] = json_encode($fbi);
         $data['c_trans'] = json_encode($trans);
+        $data['c_agen'] = json_encode($agen);
 
         $this->load->view('pegawai/layout/header', ['title' => 'Dashboard Pegawai']);
         $this->load->view('pegawai/layout/sidebar', $data);

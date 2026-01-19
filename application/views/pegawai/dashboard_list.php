@@ -121,6 +121,7 @@
             <option value="fbi" selected>Fee Base Income (FBI)</option>
             <option value="voa">Volume of Agent (VoA)</option>
             <option value="trans">Transaksi</option>
+            <option value="agen">Agen</option>
           </select>
         </div>
       </div>
@@ -167,7 +168,8 @@
                 $kategori = [
                   'Transaksi' => ['t' => ($t_row->target_transaksi ?? 0), 'r' => $t->real_transaksi],
                   'FBI'       => ['t' => ($t_row->target_fbi ?? 0),       'r' => $t->real_fbi],
-                  'VoA'       => ['t' => ($t_row->target_voa ?? 0),       'r' => $t->real_voa]
+                  'VoA'       => ['t' => ($t_row->target_voa ?? 0),       'r' => $t->real_voa],
+                  'Agen'      => ['t' => ($t_row->target_agen ?? 0),      'r' => ($t->real_agen ?? 0)]
                 ];
                 $first = true;
                 foreach ($kategori as $label => $val):
@@ -178,7 +180,7 @@
                 ?>
                   <tr>
                     <?php if ($first): ?>
-                      <td rowspan="3" class="font-weight-bold bg-white align-middle"><?= date('d M Y', strtotime($t->periode)) ?></td>
+                      <td rowspan="4" class="font-weight-bold bg-white align-middle"><?= date('d M Y', strtotime($t->periode)) ?></td>
                     <?php endif; ?>
                     <td class="text-left pl-3 font-weight-bold bg-light"><?= $label ?></td>
                     <td class="text-right pr-3"><?= number_format($target, 0, ',', '.') ?></td>
@@ -186,7 +188,7 @@
                     <td><span class="badge badge-<?= ($prog >= 100) ? 'success' : ($prog >= 80 ? 'warning' : 'danger') ?>"><?= $prog ?>%</span></td>
                     <td class="font-weight-bold <?= ($gap >= 0) ? 'text-success' : 'text-danger' ?>"><?= ($gap >= 0 ? '+' : '') . number_format($gap, 0, ',', '.') ?></td>
                     <?php if ($first): ?>
-                      <td rowspan="3" class="text-wrap small text-muted align-middle"><?= htmlspecialchars($t->catatan ?? '-') ?></td>
+                      <td rowspan="4" class="text-wrap small text-muted align-middle"><?= htmlspecialchars($t->catatan ?? '-') ?></td>
                     <?php endif; ?>
                   </tr>
                 <?php $first = false;
@@ -216,7 +218,8 @@
     const allData = {
       fbi: <?= $c_fbi ?? '{"t":[],"r":[]}' ?>,
       voa: <?= $c_voa ?? '{"t":[],"r":[]}' ?>,
-      trans: <?= $c_trans ?? '{"t":[],"r":[]}' ?>
+      trans: <?= $c_trans ?? '{"t":[],"r":[]}' ?>,
+      agen: <?= $c_agen ?? '{"t":[],"r":[]}' ?>
     };
 
     if (!labels.length) return;
@@ -233,6 +236,10 @@
       trans: {
         lbl: 'Transaksi',
         col: '#0d6efd'
+      },
+      agen: {
+        lbl: 'Agen',
+        col: '#bd04b4'
       }
     };
     const ctx = document.getElementById('mainChart').getContext('2d');

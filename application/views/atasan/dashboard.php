@@ -74,22 +74,27 @@
         $total_fbi_real   = 0;
         $total_trans_real = 0;
         $total_voa_real   = 0;
+        $total_agen_real   = 0;
+
 
         foreach ($targets as $t) {
             $total_fbi_real   += (float)$t->real_fbi;
             $total_trans_real += (float)$t->real_transaksi;
             $total_voa_real   += (float)$t->real_voa;
+            $total_agen_real   += (float)$t->real_agen;
         }
 
         // Data Target
         $target_fbi   = (float)($t_row->target_fbi ?? 0);
         $target_trans = (float)($t_row->target_transaksi ?? 0);
         $target_voa   = (float)($t_row->target_voa ?? 0);
+        $target_agen  = (float)($t_row->target_agen ?? 0);
 
         // Hitung Persentase
         $prog_fbi   = ($target_fbi > 0) ? round(($total_fbi_real / $target_fbi) * 100, 1) : 0;
         $prog_trans = ($target_trans > 0) ? round(($total_trans_real / $target_trans) * 100, 1) : 0;
         $prog_voa   = ($target_voa > 0) ? round(($total_voa_real / $target_voa) * 100, 1) : 0;
+        $prog_agen  = ($target_agen > 0) ? round(($total_agen_real / $target_agen) * 100, 1) : 0;
 
         if (!function_exists('rupiah')) {
             function rupiah($angka)
@@ -100,6 +105,23 @@
         ?>
 
         <div class="row g-3 mb-4">
+            <div class="col-md-3">
+                <div class="card border-start border-info border-4 shadow-sm">
+                    <div class="card-body">
+                        <h6 class="text-muted small fw-bold text-uppercase">Pertumbuhan Agen</h6>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="text-secondary small">Target: <?= rupiah($target_agen) ?></div>
+                                <div class="fs-4 fw-bold text-dark"><?= rupiah($total_agen_real) ?></div>
+                            </div>
+                            <div class="text-end">
+                                <span class="badge rounded-pill bg-info"><?= $prog_agen ?>%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="col-md-4">
                 <div class="card border-start border-warning border-4 shadow-sm">
                     <div class="card-body">
@@ -183,6 +205,7 @@
                         <option value="fbi" selected>Fee Base Income (FBI)</option>
                         <option value="voa">Volume of Agent (VoA)</option>
                         <option value="trans">Transaksi</option>
+                        <option value="agen">Agen</option>
                     </select>
                 </div>
             </div>
@@ -305,7 +328,8 @@
                                 $kategori = [
                                     'Transaksi' => ['t' => ($t_row->target_transaksi ?? 0), 'r' => $t->real_transaksi],
                                     'FBI'       => ['t' => ($t_row->target_fbi ?? 0),       'r' => $t->real_fbi],
-                                    'VoA'       => ['t' => ($t_row->target_voa ?? 0),       'r' => $t->real_voa]
+                                    'VoA'       => ['t' => ($t_row->target_voa ?? 0),       'r' => $t->real_voa],
+                                    'Agen'      => ['t' => ($t_row->target_agen ?? 0),      'r' => ($t->real_agen ?? 0)]
                                 ];
 
                                 $first = true;
@@ -320,7 +344,7 @@
                                 ?>
                                     <tr class="text-nowrap">
                                         <?php if ($first): ?>
-                                            <td rowspan="3" class="fw-bold bg-white align-middle">
+                                            <td rowspan="4" class="fw-bold bg-white align-middle">
                                                 <?= date('d M Y', strtotime($t->periode)) ?>
                                                 <div class="small fw-normal text-muted mt-1">
                                                     <i class="bi bi-clock me-1"></i>
@@ -338,10 +362,10 @@
                                         </td>
 
                                         <?php if ($first): ?>
-                                            <td rowspan="3" class="align-middle">
+                                            <td rowspan="4" class="align-middle">
                                                 <?= (!empty($t_row) && isset($t_row->tgl_target_final)) ? date('d-m-Y', strtotime($t_row->tgl_target_final)) : '-' ?>
                                             </td>
-                                            <td rowspan="3" class="text-wrap small text-muted align-middle" style="max-width: 200px;">
+                                            <td rowspan="4" class="text-wrap small text-muted align-middle" style="max-width: 200px;">
                                                 <?= htmlspecialchars($t->catatan ?? '-') ?>
                                             </td>
                                         <?php endif; ?>
@@ -371,7 +395,8 @@
             const allData = {
                 fbi: <?= $c_fbi ?? '{"t":[],"r":[]}' ?>,
                 voa: <?= $c_voa ?? '{"t":[],"r":[]}' ?>,
-                trans: <?= $c_trans ?? '{"t":[],"r":[]}' ?>
+                trans: <?= $c_trans ?? '{"t":[],"r":[]}' ?>,
+                agen: <?= $c_agen ?? '{"t":[],"r":[]}' ?>
             };
 
             if (!labels.length) return;
@@ -388,6 +413,10 @@
                 trans: {
                     lbl: 'Transaksi',
                     col: '#0d6efd'
+                },
+                agen: {
+                    lbl: 'Agen',
+                    col: '#6f42c1'
                 }
             };
 
