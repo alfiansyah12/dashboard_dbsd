@@ -8,10 +8,11 @@ class Pegawai extends MY_Controller
         parent::__construct();
         $this->require_role('pegawai');
 
-        // load model yang dipakai di controller ini
         $this->load->model('Pegawai_tugas_model');
         $this->load->model('Tugas_model');
         $this->load->model('Goals_model');
+        // TAMBAHKAN MODEL INI
+        $this->load->model('Atasan_target_model');
     }
 
     private function hasActiveTask()
@@ -156,27 +157,71 @@ class Pegawai extends MY_Controller
     public function dashboard_list()
     {
         $user_id = (int)$this->session->userdata('user_id');
+        $this->load->library('pagination');
 
-        $this->db->select('
-        pt.id as pegawai_tugas_id,
-        pt.tanggal_ambil,
-        pt.status,
-        pt.target_nilai,
-        pt.deadline_tanggal,
-        t.nama_tugas,
-        di.activity,
-        di.progress_nilai,
-        di.updated_at,
-        di.created_at
-    ');
+        // 1. Ambil data Tugas Pegawai (Eksisting)
+        $this->db->select('pt.id as pegawai_tugas_id, pt.tanggal_ambil, pt.status, pt.target_nilai, pt.deadline_tanggal, t.nama_tugas, di.activity, di.pending_matters, di.close_the_path, di.progress_nilai, di.updated_at, di.created_at');
         $this->db->from('pegawai_tugas pt');
         $this->db->join('tugas t', 't.id = pt.tugas_id');
         $this->db->join('dashboard_input di', 'di.pegawai_tugas_id = pt.id', 'left');
         $this->db->where('pt.user_id', $user_id);
         $this->db->order_by('COALESCE(di.updated_at, di.created_at, pt.created_at)', 'DESC', false);
-
         $data['rows'] = $this->db->get()->result();
         $data['has_active_task'] = $this->hasActiveTask();
+
+        // 2. Konfigurasi Pagination KPI
+        $config['base_url'] = base_url('index.php/pegawai/dashboard_list');
+        $config['total_rows'] = $this->db->count_all('kpi_realizations');
+        $config['per_page'] = 5;
+        $config['uri_segment'] = 3;
+        $config['reuse_query_string'] = TRUE;
+
+        // --- STYLING PAGINATION (Ini yang membuat tampilan jadi kotak-kotak) ---
+        $config['full_tag_open']   = '<ul class="pagination pagination-sm m-0 justify-content-center">';
+        $config['full_tag_close']  = '</ul>';
+        $config['num_tag_open']    = '<li class="page-item">';
+        $config['num_tag_close']   = '</li>';
+        $config['cur_tag_open']    = '<li class="page-item active"><a class="page-link" href="#">';
+        $config['cur_tag_close']   = '</a></li>';
+        $config['next_tag_open']   = '<li class="page-item">';
+        $config['next_tag_close']  = '</li>';
+        $config['prev_tag_open']   = '<li class="page-item">';
+        $config['prev_tag_close']  = '</li>';
+        $config['attributes']      = array('class' => 'page-link');
+
+        $this->pagination->initialize($config);
+        $page = ($this->uri->segment(3)) ? $this->uri->segment(3) : 0;
+
+        // 3. Ambil data Riwayat KPI
+        $data['targets'] = $this->db->limit($config['per_page'], $page)
+            ->order_by('periode', 'DESC')
+            ->get('kpi_realizations')->result();
+
+        $data['pagination_links'] = $this->pagination->create_links();
+        $data['current_mode'] = $this->input->get('mode') ?: 'day';
+
+        // Ambil data Grafik (Copy dari logika target() Admin)
+        $chart_raw = $this->Atasan_target_model->get_chart_data($data['current_mode']);
+        $labels = [];
+        $voa = ['t' => [], 'r' => []];
+        $fbi = ['t' => [], 'r' => []];
+        $trans = ['t' => [], 'r' => []];
+        foreach ($chart_raw as $row) {
+            $labels[] = ($data['current_mode'] == 'day') ? date('d M', strtotime($row->label)) : $row->label;
+            $voa['t'][] = $row->t_voa;
+            $voa['r'][] = (float)$row->r_voa;
+            $fbi['t'][] = $row->t_fbi;
+            $fbi['r'][] = (float)$row->r_fbi;
+            $trans['t'][] = $row->t_trans;
+            $trans['r'][] = (float)$row->r_trans;
+            $agen['t'][] = $row->t_agen;
+            $agen['r'][] = (float)$row->r_agen;
+        }
+        $data['chart_labels'] = json_encode($labels);
+        $data['c_voa'] = json_encode($voa);
+        $data['c_fbi'] = json_encode($fbi);
+        $data['c_trans'] = json_encode($trans);
+        $data['c_agen'] = json_encode($agen);
 
         $this->load->view('pegawai/layout/header', ['title' => 'Dashboard Pegawai']);
         $this->load->view('pegawai/layout/sidebar', $data);

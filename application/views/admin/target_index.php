@@ -15,8 +15,10 @@ foreach (($targets_kpi ?? []) as $tk) {
 $sumRealisasi = 0;
 $sumFBI = 0;
 $sumVoA = 0;
+$sumAgen = 0;
 foreach (($realizations ?? []) as $rl) {
-  $sumRealisasi += (float)($rl->real_voa ?? 0) + (float)($rl->real_fbi ?? 0) + (float)($rl->real_transaksi ?? 0);
+  $sumRealisasi += (float)($rl->real_voa ?? 0) + (float)($rl->real_fbi ?? 0) + (float)($rl->real_transaksi ?? 0) + (float)($rl->real_agen ?? 0);
+  $sumAgen += (float)($rl->real_agen ?? 0);
   $sumFBI += (float)($rl->real_fbi ?? 0);
   $sumVoA += (float)($rl->real_voa ?? 0);
 }
@@ -73,6 +75,7 @@ $periode_val = $is_edit ? date('Y-m', strtotime($edit->periode)) : '';
         <option value="fbi" selected>Fee Base Income (FBI)</option>
         <option value="voa">Volume of Agent (VoA)</option>
         <option value="trans">Transaksi</option>
+        <option value="agen">Jumlah Agen</option>
       </select>
     </div>
   </div>
@@ -118,6 +121,10 @@ $periode_val = $is_edit ? date('Y-m', strtotime($edit->periode)) : '';
             value="<?= $is_edit_target ? $edit_target->periode : date('Y-m-d') ?>" required>
         </div>
         <div class="col-md-2">
+          <label class="form-label small text-muted mb-1">Target Agen</label>
+          <input type="number" name="target_agen" class="form-control form-control-sm" value="<?= $is_edit_target ? $edit_target->target_agen : '' ?>">
+        </div>
+        <div class="col-md-2">
           <label class="form-label small text-muted mb-1">Target VOA</label>
           <input type="number" name="target_voa" class="form-control form-control-sm" value="<?= $is_edit_target ? $edit_target->target_voa : '' ?>">
         </div>
@@ -151,6 +158,10 @@ $periode_val = $is_edit ? date('Y-m', strtotime($edit->periode)) : '';
             value="<?= $is_edit_real ? $edit_real->periode : date('Y-m-d') ?>" required>
         </div>
         <div class="col-md-2">
+          <label class="form-label small text-muted mb-1">Real Agen</label>
+          <input type="number" name="real_agen" class="form-control form-control-sm" value="<?= $is_edit_real ? $edit_real->real_agen : '' ?>">
+        </div>
+        <div class="col-md-2">
           <label class="form-label small text-muted mb-1">Real VOA</label>
           <input type="number" name="real_voa" class="form-control form-control-sm" value="<?= $is_edit_real ? $edit_real->real_voa : '' ?>">
         </div>
@@ -176,23 +187,23 @@ $periode_val = $is_edit ? date('Y-m', strtotime($edit->periode)) : '';
 
 <<div class="row">
   <div class="col-md-5">
-    <div class="card shadow-sm border-0">
+    <div class="card shadow-sm border-0" style="margin-right: 2px;">
       <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-        <h6 class="mb-0"><i class="fa-solid fa-bullseye me-2"></i>Daftar Target Bulanan</h6>
+        <h6 class="mb-0 pl"><i class="fa-solid fa-bullseye me-2"></i>Daftar Target Bulanan</h6>
       </div>
       <div class="table-responsive" style="max-height: 400px;">
         <table class="table table-sm table-hover align-middle mb-0">
           <thead class="table-light">
             <tr>
               <th>Periode</th>
-              <th>Rincian Target (VoA / FBI / Trans)</th>
-              <th class="text-end">Action</th>
+              <th>Rincian Target (VoA / FBI / Trans/VOA)</th>
+              <th class="text-end" style="padding-right: 15px;">Action</th>
             </tr>
           </thead>
           <tbody>
             <?php if (empty($targets_kpi)): ?>
               <tr>
-                <td colspan="3" class="text-center py-3 text-muted small">Belum ada target diinput.</td>
+                <td colspan=" 3" class="text-center py-3 text-muted small">Belum ada target diinput.</td>
               </tr>
             <?php endif; ?>
             <?php foreach ($targets_kpi as $tk): ?>
@@ -203,11 +214,12 @@ $periode_val = $is_edit ? date('Y-m', strtotime($edit->periode)) : '';
                     <span><b class="text-success">VoA:</b> <?= number_format($tk->target_voa, 0, ',', '.') ?></span>
                     <span><b class="text-warning">FBI:</b> <?= number_format($tk->target_fbi, 0, ',', '.') ?></span>
                     <span><b class="text-primary">Trans:</b> <?= number_format($tk->target_transaksi, 0, ',', '.') ?></span>
+                    <span><b class="text-info">Agen:</b> <?= number_format($tk->target_agen, 0, ',', '.') ?></span>
                   </div>
                 </td>
                 <td class="text-end">
-                  <div class="btn-group">
-                    <a href="<?= base_url('index.php/admin/target?edit_target_id=' . (int)$tk->id) ?>" class="btn btn-xs btn-outline-warning">
+                  <div class="btn-group" style="padding-right: 10px;">
+                    <a href=" <?= base_url('index.php/admin/target?edit_target_id=' . (int)$tk->id) ?>" class="btn btn-xs btn-outline-warning">
                       <i class="fa-solid fa-pen"></i>
                     </a>
                     <a href="<?= base_url('index.php/admin/delete_target/' . (int)$tk->id) ?>"
@@ -233,6 +245,7 @@ $periode_val = $is_edit ? date('Y-m', strtotime($edit->periode)) : '';
           <thead class="table-light">
             <tr class="text-nowrap small text-center">
               <th>Tanggal</th>
+              <th>Realisasi Agen</th>
               <th>Realisasi VoA</th>
               <th>Realisasi FBI</th>
               <th>Realisasi Trans</th>
@@ -248,6 +261,7 @@ $periode_val = $is_edit ? date('Y-m', strtotime($edit->periode)) : '';
             <?php foreach ($realizations as $rl): ?>
               <tr class="text-center small">
                 <td class="fw-semibold"><?= date('d/m/y', strtotime($rl->periode)) ?></td>
+                <td class="text-end pe-3"><?= number_format($rl->real_agen, 0, ',', '.') ?></td>
                 <td class="text-end pe-3"><?= number_format($rl->real_voa, 0, ',', '.') ?></td>
                 <td class="text-end pe-3"><?= number_format($rl->real_fbi, 0, ',', '.') ?></td>
                 <td class="text-end pe-3"><?= number_format($rl->real_transaksi, 0, ',', '.') ?></td>
@@ -301,7 +315,8 @@ $periode_val = $is_edit ? date('Y-m', strtotime($edit->periode)) : '';
               $kategori = [
                 'Transaksi' => ['t' => ($t_row->target_transaksi ?? 0), 'r' => $t->real_transaksi],
                 'FBI'       => ['t' => ($t_row->target_fbi ?? 0),       'r' => $t->real_fbi],
-                'VoA'       => ['t' => ($t_row->target_voa ?? 0),       'r' => $t->real_voa]
+                'VoA'       => ['t' => ($t_row->target_voa ?? 0),       'r' => $t->real_voa],
+                'Agen'      => ['t' => ($t_row->target_agen ?? 0),      'r' => ($t->real_agen ?? 0)] // Tambahkan Agen
               ];
 
               $first = true;
@@ -314,7 +329,7 @@ $periode_val = $is_edit ? date('Y-m', strtotime($edit->periode)) : '';
               ?>
                 <tr class="text-nowrap">
                   <?php if ($first): ?>
-                    <td rowspan="3" class="fw-bold bg-white">
+                    <td rowspan="4" class="fw-bold bg-white">
                       <?= date('d M Y', strtotime($t->periode)) ?>
                       <div class="small fw-normal text-muted mt-1">
                         <i class="fa-regular fa-clock me-1"></i>
@@ -332,12 +347,12 @@ $periode_val = $is_edit ? date('Y-m', strtotime($edit->periode)) : '';
                   </td>
 
                   <?php if ($first): ?>
-                    <td rowspan="3">
+                    <td rowspan="4">
                       <?= (!empty($t_row) && isset($t_row->tgl_target_final)) ? date('d-m-Y', strtotime($t_row->tgl_target_final)) : '-' ?>
                     </td>
-                    <td rowspan="3" class="text-wrap small text-muted">
+                    <td rowspan="4" class="text-wrap small text-muted">
                       <?= htmlspecialchars($t->catatan ?? '-') ?> </td>
-                    <td rowspan="3">
+                    <td rowspan="4">
                       <div class="d-flex flex-column gap-1">
                         <?php if ($t_row): ?>
                           <a href="<?= base_url('index.php/admin/target?edit_id=' . (int)$t_row->id) ?>" class="btn btn-sm btn-warning">
@@ -362,6 +377,14 @@ $periode_val = $is_edit ? date('Y-m', strtotime($edit->periode)) : '';
       </table>
     </div>
     </table>
+    <div class="card-footer bg-white d-flex justify-content-between align-items-center">
+      <div class="small text-muted">
+        Menampilkan <?= count($targets) ?> data terbaru.
+      </div>
+      <nav>
+        <?= $pagination_links ?? '' ?>
+      </nav>
+    </div>
   </div>
 
   <script>
@@ -370,7 +393,8 @@ $periode_val = $is_edit ? date('Y-m', strtotime($edit->periode)) : '';
       const allData = {
         fbi: <?= $c_fbi ?? '{"t":[],"r":[]}' ?>,
         voa: <?= $c_voa ?? '{"t":[],"r":[]}' ?>,
-        trans: <?= $c_trans ?? '{"t":[],"r":[]}' ?>
+        trans: <?= $c_trans ?? '{"t":[],"r":[]}' ?>,
+        agen: <?= $c_agen ?? '{"t":[],"r":[]}' ?>
       };
 
       if (!labels.length) return;
@@ -387,6 +411,10 @@ $periode_val = $is_edit ? date('Y-m', strtotime($edit->periode)) : '';
         trans: {
           lbl: 'Transaksi',
           col: '#0d6efd'
+        },
+        agen: {
+          lbl: 'Agen',
+          col: '#6f42c1'
         }
       };
       const ctx = document.getElementById('mainChart').getContext('2d');
@@ -397,7 +425,8 @@ $periode_val = $is_edit ? date('Y-m', strtotime($edit->periode)) : '';
           datasets: [{
               label: 'Target',
               data: allData.fbi.t,
-              borderColor: '#ccc',
+              borderColor: '#ff0000',
+              backgroundColor: 'rgb(255, 243, 251)',
               fill: false,
               tension: 0.3
             },

@@ -67,8 +67,9 @@
         <div class="card-body">
           <?php
           $pt_id = isset($row->id) ? (int)$row->id : (isset($row->pegawai_tugas_id) ? (int)$row->pegawai_tugas_id : 0);
-          $isTerminated = ($row->status === 'terminated');
-          $disabledAttr = $isTerminated ? 'disabled' : '';
+
+          $isLocked = ($row->status === 'terminated' || $row->status === 'done');
+          $disabledAttr = $isLocked ? 'disabled' : '';
           ?>
 
           <form method="post" action="<?= base_url('index.php/pegawai/dashboard_store') ?>">
@@ -117,13 +118,16 @@
                 <div class="form-group">
                   <label class="font-weight-bold">Pending Matters</label>
                   <textarea name="pending_matters" class="form-control" rows="3"
+                    placeholder="Contoh: Menunggu konfirmasi dari pihak IT terkait akses server..."
                     <?= $disabledAttr ?>><?= $input->pending_matters ?? '' ?></textarea>
                 </div>
               </div>
+
               <div class="col-md-6">
                 <div class="form-group">
                   <label class="font-weight-bold">Clear the Path</label>
                   <textarea name="close_the_path" class="form-control" rows="3"
+                    placeholder="Contoh: Melakukan koordinasi ulang dengan tim operasional untuk mempercepat proses..."
                     <?= $disabledAttr ?>><?= $input->close_the_path ?? '' ?></textarea>
                 </div>
               </div>
@@ -131,10 +135,14 @@
 
             <hr>
             <div class="d-flex justify-content-end">
-              <?php if (!$isTerminated): ?>
+              <?php if (!$isLocked): ?>
                 <button type="submit" class="btn btn-primary px-4 shadow-sm">
                   <i class="fas fa-save fa-sm"></i> Simpan Laporan
                 </button>
+              <?php else: ?>
+                <div class="alert alert-warning py-2 px-3 mb-0 small">
+                  <i class="fas fa-lock me-1"></i> Laporan sudah dikunci karena status tugas <b><?= strtoupper($row->status) ?></b>.
+                </div>
               <?php endif; ?>
             </div>
           </form>

@@ -98,12 +98,16 @@ class Admin extends MY_Controller
         $data['tugas']  = $this->Tugas_model->getAll();
         $data['departemen'] = $this->Departemen_model->getAll();
 
-        // 2. Data Monitoring Progress Pegawai
-        $this->db->select('pt.*, u.nama as nama_pegawai, t.nama_tugas, di.progress_nilai');
+        // 2. Data Monitoring Progress Pegawai (Hanya On Going)
+        $this->db->select('pt.*, u.nama as nama_pegawai, t.nama_tugas, di.progress_nilai, di.activity');
         $this->db->from('pegawai_tugas pt');
         $this->db->join('users u', 'u.id = pt.user_id');
         $this->db->join('tugas t', 't.id = pt.tugas_id');
         $this->db->join('dashboard_input di', 'di.pegawai_tugas_id = pt.id', 'left');
+
+        // TAMBAHKAN BARIS INI: Hanya ambil yang sedang berjalan
+        $this->db->where('pt.status', 'on going');
+
         $data['assignments'] = $this->db->get()->result();
 
         $this->render('Kelola Tugas', 'admin/tugas', $data);
@@ -157,6 +161,34 @@ class Admin extends MY_Controller
     {
         date_default_timezone_set('Asia/Jakarta');
         $mode = $this->input->get('mode') ?: 'day';
+        $this->load->library('pagination');
+
+        // 1. Konfigurasi Pagination
+        $config['base_url'] = base_url('index.php/admin/target');
+        $config['total_rows'] = $this->db->count_all('kpi_realizations');
+        $config['per_page'] = 10; // Jumlah baris per halaman
+        $config['uri_segment'] = 3;
+        $config['reuse_query_string'] = TRUE; // Agar filter grafik (mode) tidak hilang saat pindah halaman
+
+        // Styling Bootstrap 4 untuk link pagination
+        $config['full_tag_open'] = '<ul class="pagination pagination-sm m-0">';
+        $config['full_tag_close'] = '</ul>';
+        $config['num_tag_open'] = '<li class="page-item">';
+        $config['num_tag_close'] = '</li>';
+        $config['cur_tag_open'] = '<li class="page-item active"><a class="page-link" href="#">';
+        $config['cur_tag_close'] = '</a></li>';
+        $config['attributes'] = array('class' => 'page-link');
+
+        $this->pagination->initialize($config);
+        $page = ($this->uri->segment(3)) ? $this->uri->segment(3) : 0;
+
+        // 2. Ambil data dengan LIMIT dan OFFSET
+        $data['targets_kpi']  = $this->db->order_by('periode', 'DESC')->get('kpi_targets')->result();
+        $data['realizations'] = $this->db->limit($config['per_page'], $page)
+            ->order_by('periode', 'DESC')
+            ->get('kpi_realizations')->result();
+        $data['targets']      = $data['realizations'];
+        $data['pagination_links'] = $this->pagination->create_links();
 
         // 1. Ambil data untuk Tabel Terpisah
         $data['targets_kpi']  = $this->db->order_by('periode', 'DESC')->get('kpi_targets')->result();
@@ -170,6 +202,7 @@ class Admin extends MY_Controller
         $voa = ['t' => [], 'r' => []];
         $fbi = ['t' => [], 'r' => []];
         $trans = ['t' => [], 'r' => []];
+        $agen = ['t' => [], 'r' => []];
 
         foreach ($chart_raw as $row) {
             if ($mode == 'day') $labels[] = date('d M', strtotime($row->label));
@@ -182,12 +215,15 @@ class Admin extends MY_Controller
             $fbi['r'][]   = (float)$row->r_fbi;
             $trans['t'][] = $row->t_trans;
             $trans['r'][] = (float)$row->r_trans;
+            $agen['t'][]  = $row->t_agen;
+            $agen['r'][]  = (float)$row->r_agen;
         }
 
         $data['chart_labels'] = json_encode($labels);
         $data['c_voa']        = json_encode($voa);
         $data['c_fbi']        = json_encode($fbi);
         $data['c_trans']      = json_encode($trans);
+        $data['c_agen']  = json_encode($agen);
         $data['current_mode'] = $mode;
 
         // Inisialisasi variabel agar tidak error di View
@@ -205,30 +241,30 @@ class Admin extends MY_Controller
     public function save_target()
     {
         $payload = [
-            'periode'          => $this->input->post('periode', true),
-            'target_voa'       => (int)$this->input->post('target_voa', true),
-            'target_fbi'       => (int)$this->input->post('target_fbi', true),
-            'target_transaksi' => (int)$this->input->post('target_transaksi', true),
-            'tgl_target_final' => $this->input->post('tgl_target_final', true),
-            'created_at'       => date('Y-m-d H:i:s')
+            'periode' => $this->input->post('periode', true),
+            'target_voa' => (int)$this->input->post('target_voa'),
+            'target_fbi' => (int)$this->input->post('target_fbi'),
+            'target_transaksi' => (int)$this->input->post('target_transaksi'),
+            'target_agen' => (int)$this->input->post('target_agen'),
+            'tgl_target_final' => $this->input->post('tgl_target_final'),
+            'created_at' => date('Y-m-d H:i:s')
         ];
         $this->db->insert('kpi_targets', $payload);
-        $this->session->set_flashdata('success', 'Target KPI Berhasil Disimpan.');
         redirect('admin/target');
     }
 
     public function save_realization()
     {
         $payload = [
-            'periode'          => $this->input->post('periode', true),
-            'real_voa'         => (int)$this->input->post('real_voa', true),
-            'real_fbi'         => (int)$this->input->post('real_fbi', true),
-            'real_transaksi'   => (int)$this->input->post('real_transaksi', true),
-            'catatan'          => $this->input->post('catatan', true),
-            'created_at'       => date('Y-m-d H:i:s')
+            'periode' => $this->input->post('periode', true),
+            'real_voa' => (int)$this->input->post('real_voa'),
+            'real_fbi' => (int)$this->input->post('real_fbi'),
+            'real_transaksi' => (int)$this->input->post('real_transaksi'),
+            'real_agen' => (int)$this->input->post('real_agen'),
+            'catatan' => $this->input->post('catatan', true),
+            'created_at' => date('Y-m-d H:i:s')
         ];
         $this->db->insert('kpi_realizations', $payload);
-        $this->session->set_flashdata('success', 'Realisasi Harian Berhasil Disimpan.');
         redirect('admin/target');
     }
     public function target_store()
@@ -254,6 +290,8 @@ class Admin extends MY_Controller
             'real_fbi'         => (int)$this->input->post('real_fbi', true),
             'target_transaksi' => (int)$this->input->post('target_transaksi', true),
             'real_transaksi'   => (int)$this->input->post('real_transaksi', true),
+            'target_agen'       => (int)$this->input->post('target_agen', true),
+            'real_agen'         => (int)$this->input->post('real_agen', true),
             'tgl_target_final' => $this->input->post('tgl_target_final', true),
             'catatan'          => $this->input->post('catatan', true),
             'created_by'       => (int)$this->session->userdata('user_id'),
@@ -297,6 +335,8 @@ class Admin extends MY_Controller
             'real_fbi'         => (int)$this->input->post('real_fbi', true),
             'target_transaksi' => (int)$this->input->post('target_transaksi', true),
             'real_transaksi'   => (int)$this->input->post('real_transaksi', true),
+            'target_agen'       => (int)$this->input->post('target_agen', true),
+            'real_agen'         => (int)$this->input->post('real_agen', true),
             'tgl_target_final' => $this->input->post('tgl_target_final', true),
             'catatan'          => $this->input->post('catatan', true),
             'updated_at'       => $now,

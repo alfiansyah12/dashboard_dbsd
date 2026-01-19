@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jan 13, 2026 at 03:37 AM
+-- Generation Time: Jan 14, 2026 at 08:50 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.0.30
 
@@ -43,7 +43,8 @@ INSERT INTO `atasan_review` (`id`, `pegawai_tugas_id`, `review_status`, `review_
 (12, 15, 'not_yet', 14, '2025-12-23 06:06:31'),
 (13, 14, 'done', 14, '2025-12-24 00:38:48'),
 (14, 13, 'done', 14, '2025-12-24 00:38:32'),
-(15, 16, 'done', 14, '2026-01-04 14:09:46');
+(15, 16, 'not_yet', 14, '2026-01-14 07:35:30'),
+(16, 19, 'done', 14, '2026-01-14 07:04:33');
 
 -- --------------------------------------------------------
 
@@ -109,7 +110,10 @@ INSERT INTO `dashboard_input` (`id`, `pegawai_tugas_id`, `activity`, `pending_ma
 (13, 13, 'qwert123', 'asdf123123', 'qwer123123', '2025-12-23 13:03:58', '2025-12-23 13:03:31', 0),
 (14, 14, 'qweqw123', 'qeqweasdad123', 'zxczxcz123', '2025-12-23 13:05:31', '2025-12-23 13:05:31', 0),
 (15, 15, 'zxczxc', 'czasdasd', 'asdasdasd', '2025-12-23 13:06:18', '2025-12-23 13:06:18', 0),
-(16, 16, 'Monitoring partnership', '', '', '2026-01-13 03:29:49', '2026-01-04 18:34:51', 6);
+(16, 16, 'Monitoring partnership', 'Menunggu konfirmasi dari DBPD\r\nhuhuhu', '', '2026-01-14 14:35:30', '2026-01-04 18:34:51', 9),
+(17, 17, 'Validasi Agen Sulampua', '', '', '2026-01-14 02:39:18', '2026-01-14 02:38:40', 0),
+(18, 18, 'sudah selesai', '', '', '2026-01-14 03:17:18', '2026-01-14 03:17:18', 0),
+(19, 19, 'salah ambil', '', '', '2026-01-14 03:22:09', '2026-01-14 03:22:09', 0);
 
 -- --------------------------------------------------------
 
@@ -131,7 +135,8 @@ INSERT INTO `departemen` (`id`, `nama_departemen`, `created_at`) VALUES
 (7, 'Biller Partnership', '2026-01-02 03:13:01'),
 (8, 'Switching/ Principal & Partnership', '2026-01-02 03:13:19'),
 (9, 'Sector Solution Partnership', '2026-01-02 03:13:33'),
-(10, 'Agent Banking & PPOB  Business', '2026-01-02 03:14:09');
+(10, 'Agent Banking & PPOB  Business', '2026-01-02 03:14:09'),
+(11, 'hghgh', '2026-01-14 07:29:04');
 
 -- --------------------------------------------------------
 
@@ -155,7 +160,7 @@ INSERT INTO `goals` (`id`, `pegawai_tugas_id`, `goals`, `created_at`, `updated_a
 (3, 13, 'proses', '2025-12-23 13:03:31', '2025-12-23 13:03:58'),
 (4, 14, 'berhasil', '2025-12-23 13:05:31', '2025-12-23 13:05:31'),
 (5, 15, 'sadsd', '2025-12-23 13:06:18', '2025-12-23 13:06:18'),
-(6, 16, 'Monitoring partnership  dan agen', '2026-01-05 00:34:51', '2026-01-13 09:29:49');
+(6, 16, 'Monitoring partnership  dan agen', '2026-01-05 00:34:51', '2026-01-14 14:33:30');
 
 -- --------------------------------------------------------
 
@@ -227,6 +232,7 @@ CREATE TABLE `pegawai_tugas` (
   `tanggal_ambil` date DEFAULT NULL,
   `status` enum('on going','done','terminated') DEFAULT 'on going',
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` datetime DEFAULT NULL,
   `target_nilai` int(11) DEFAULT 0,
   `deadline_tanggal` date DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -235,11 +241,14 @@ CREATE TABLE `pegawai_tugas` (
 -- Dumping data for table `pegawai_tugas`
 --
 
-INSERT INTO `pegawai_tugas` (`id`, `user_id`, `tugas_id`, `tanggal_ambil`, `status`, `created_at`, `target_nilai`, `deadline_tanggal`) VALUES
-(13, 15, 6, '2025-12-23', 'on going', '2025-12-23 06:03:16', 0, NULL),
-(14, 16, 6, '2025-12-23', 'done', '2025-12-23 06:05:15', 0, NULL),
-(15, 17, 6, '2025-12-23', 'terminated', '2025-12-23 06:06:12', 0, NULL),
-(16, 18, 8, '2026-01-04', 'on going', '2026-01-04 11:34:30', 10, '2026-01-31');
+INSERT INTO `pegawai_tugas` (`id`, `user_id`, `tugas_id`, `tanggal_ambil`, `status`, `created_at`, `updated_at`, `target_nilai`, `deadline_tanggal`) VALUES
+(13, 15, 6, '2025-12-23', 'on going', '2025-12-23 06:03:16', NULL, 0, NULL),
+(14, 16, 6, '2025-12-23', 'done', '2025-12-23 06:05:15', NULL, 0, NULL),
+(15, 17, 6, '2025-12-23', 'terminated', '2025-12-23 06:06:12', NULL, 0, NULL),
+(16, 18, 8, '2026-01-04', 'on going', '2026-01-04 11:34:30', NULL, 10, '2026-01-31'),
+(17, 18, 12, '2026-01-14', 'done', '2026-01-13 19:38:11', NULL, 0, NULL),
+(18, 18, 12, '2026-01-14', 'terminated', '2026-01-13 20:16:47', NULL, 0, NULL),
+(19, 18, 12, '2026-01-14', 'terminated', '2026-01-13 20:21:21', NULL, 0, NULL);
 
 -- --------------------------------------------------------
 
@@ -264,7 +273,8 @@ INSERT INTO `tugas` (`id`, `nama_tugas`, `deskripsi`, `departemen_id`, `created_
 (9, 'Business/transactional Partnership', 'Business/transactional Partnership dengan berbagai sektor: healthcare, government, educations, etc', 8, '2026-01-02 03:15:24'),
 (10, 'Mengelola bisnis agent', 'Mengelola bisnis agent banking & PPOB', 10, '2026-01-02 03:15:48'),
 (11, 'API dan Virtual Account', 'Mengelola API dan Virtual Account', 9, '2026-01-02 03:16:28'),
-(12, 'Mengelola Partnership Sulampua', 'Mengelola Partnership Sulampua', 7, '2026-01-05 01:03:50');
+(12, 'Mengelola Partnership Sulampua', 'Mengelola Partnership Sulampua', 7, '2026-01-05 01:03:50'),
+(13, 'yuzi cico', 'indomaret', 7, '2026-01-14 07:29:46');
 
 -- --------------------------------------------------------
 
@@ -374,7 +384,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `atasan_review`
 --
 ALTER TABLE `atasan_review`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT for table `atasan_target`
@@ -386,13 +396,13 @@ ALTER TABLE `atasan_target`
 -- AUTO_INCREMENT for table `dashboard_input`
 --
 ALTER TABLE `dashboard_input`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- AUTO_INCREMENT for table `departemen`
 --
 ALTER TABLE `departemen`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT for table `goals`
@@ -416,13 +426,13 @@ ALTER TABLE `kpi_targets`
 -- AUTO_INCREMENT for table `pegawai_tugas`
 --
 ALTER TABLE `pegawai_tugas`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- AUTO_INCREMENT for table `tugas`
 --
 ALTER TABLE `tugas`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT for table `users`
