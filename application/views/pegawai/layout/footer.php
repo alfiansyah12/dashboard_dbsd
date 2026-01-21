@@ -1,19 +1,22 @@
-    </div>
-  </div>
+</main>
 </div>
-
-<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-document.querySelectorAll('#sidebarMenu .nav-link').forEach(link => {
-  link.addEventListener('click', () => {
-    const sidebar = document.getElementById('sidebarMenu');
-    if (window.innerWidth < 768 && sidebar.classList.contains('show')) {
-      sidebar.classList.remove('show');
-    }
+  // Logic untuk menutup sidebar otomatis di mobile setelah klik link
+  document.querySelectorAll('#sidebarMenu .nav-link').forEach(link => {
+    link.addEventListener('click', () => {
+      const sidebar = document.getElementById('sidebarMenu');
+      const bsCollapse = new bootstrap.Collapse(sidebar, {
+        toggle: false
+      });
+      if (window.innerWidth < 768) {
+        bsCollapse.hide();
+      }
+    });
   });
-});
 </script>
+</body>
+
+</html>

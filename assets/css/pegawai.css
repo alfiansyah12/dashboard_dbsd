@@ -1,0 +1,173 @@
+/* Sidebar Utama */
+.sidebar {
+    background: linear-gradient(180deg, #004776 0%, #002d4b 100%);
+    min-height: 100vh;
+    box-shadow: 4px 0 10px rgba(0, 0, 0, 0.1);
+    z-index: 100;
+    transition: all 0.3s;
+}
+
+/* Header di dalam sidebar */
+.sidebar-header {
+    text-align: center;
+    padding: 20px 10px;
+    color: #ffdb58; /* Warna Emas BTN */
+}
+
+.logo-img {
+    width: 150px;
+    height: auto;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+}
+
+/* Navigasi */
+.nav-link {
+    color: #cbd5e1 !important;
+    font-weight: 500;
+    padding: 12px 15px;
+    border-radius: 8px;
+    margin-bottom: 5px;
+    transition: all 0.2s ease-in-out;
+}
+
+.nav-link:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff !important;
+    transform: translateX(5px);
+}
+
+.nav-link.active {
+    background: #ffdb58 !important; /* Warna Emas */
+    color: #004776 !important; /* Teks Biru Tua agar kontras */
+    box-shadow: 0 4px 12px rgba(255, 219, 88, 0.3);
+}
+
+.nav-link i {
+    width: 25px;
+}
+
+/* Responsive Mobile */
+@media (max-width: 767.98px) {
+    .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 250px;
+        z-index: 1050;
+    }
+}
+
+.table td {
+    color: #212529 !important; 
+}
+
+
+.badge-info {
+    background-color: #17a2b8 !important; /* Biru Muda */
+    color: #ffffff !important;
+}
+
+/* Perbaikan Progress Bar agar jalurnya terlihat di tabel putih */
+.progress {
+    background-color: #e9ecef !important; /* Warna abu-abu terang untuk track */
+    border: 1px solid #dee2e6;           /* Garis tepi agar lebih tegas */
+    height: 16px !important;
+}
+
+/* Warna isi Progress Bar */
+.progress-bar {
+    background-color: #004776 !important; /* Warna biru gelap */
+}
+
+/* Teks angka di bawah progress bar */
+.table td small {
+    color: #495057 !important;
+    font-weight: 600;
+}
+.badge {
+    color: #fff !important; /* Default teks putih */
+    padding: 0.5em 0.75em !important;
+    font-weight: 600 !important;
+}
+
+/* Badge Warning (untuk progres 80%) biasanya teksnya gelap agar terbaca */
+.badge-warning {
+    background-color: #ffc107 !important;
+    color: #212529 !important; 
+}
+
+/* Badge Success (100%) */
+.badge-success {
+    background-color: #28a745 !important;
+}
+
+/* Badge Danger (<80%) */
+.badge-danger {
+    background-color: #dc3545 !important;
+}
+
+/* Perbaikan Progress Bar agar jalurnya (track) terlihat */
+.progress {
+    background-color: #e9ecef !important; /* Abu-abu terang */
+    border: 1px solid #dee2e6;
+    height: 15px !important;
+}
+
+/* Warna isi progress bar untuk Task List */
+.bg-info {
+    background-color: #0dcaf0 !important;
+}
+
+.bg-success {
+    background-color: #198754 !important;
+}
+
+.but-inputedit{
+    align-items: center;
+    display: flex;
+    justify-content: center;
+}
+
+.but-status{
+  align-items: center;
+  display: flex;
+  justify-content: center;
+}
+
+.text-md-end {
+    text-align: right !important;
+}
+
+@media (min-width: 768px) {
+    .justify-content-md-end {
+        justify-content: flex-end !important;
+    }
+}
+
+.table-riwayat {
+    font-size: 1rem !important; /* Ukuran font tabel (default biasanya 1rem) */
+}
+
+/* Memperbesar font pada bagian Header Tabel */
+.table-riwayat thead th {
+    font-size: 1.15rem !important;
+    padding: 12px 5px !important;
+}
+
+/* Memperbesar font pada Badge Persentase agar seimbang */
+.table-riwayat .badge {
+    font-size: 0.95rem !important;
+    padding: 6px 12px !important;
+}
+
+/* Memperbesar angka pada kolom Target, Realisasi, dan Gap */
+.table-riwayat td {
+    font-weight: 500;
+    padding: 10px 5px !important;
+}
+
+/* Memastikan teks catatan (note) tetap rapi meskipun font diperbesar */
+.table-riwayat .small.text-muted {
+    font-size: 0.9rem !important;
+}

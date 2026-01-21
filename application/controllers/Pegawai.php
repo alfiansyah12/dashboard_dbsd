@@ -206,6 +206,8 @@ class Pegawai extends MY_Controller
         $voa = ['t' => [], 'r' => []];
         $fbi = ['t' => [], 'r' => []];
         $trans = ['t' => [], 'r' => []];
+        $agen = ['t' => [], 'r' => []];
+
         foreach ($chart_raw as $row) {
             $labels[] = ($data['current_mode'] == 'day') ? date('d M', strtotime($row->label)) : $row->label;
             $voa['t'][] = $row->t_voa;

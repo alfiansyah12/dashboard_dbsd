@@ -1,3 +1,9 @@
+<style>
+  th {
+    text-align: center;
+  }
+</style>
+
 <?php date_default_timezone_set('Asia/Jakarta'); ?>
 
 <div id="top"></div>
@@ -76,9 +82,17 @@
             <tr>
               <td><?= htmlspecialchars($r->nama_tugas) ?></td>
               <td><?= date('d/m/Y', strtotime($r->tanggal_ambil)) ?></td>
-              <td>
-                <span class="badge badge-<?= $r->status == 'done' ? 'success' : 'info' ?>">
-                  <?= htmlspecialchars($r->status) ?>
+              <td class="but-status">
+                <?php
+                $status_class = 'info'; // Default: On Going (Biru)
+                if ($r->status == 'done') {
+                  $status_class = 'success'; // Hijau
+                } elseif ($r->status == 'terminated') {
+                  $status_class = 'danger'; // Merah
+                }
+                ?>
+                <span class="badge badge-<?= $status_class ?>">
+                  <?= htmlspecialchars(strtoupper($r->status)) ?>
                 </span>
               </td>
               <td><?= htmlspecialchars($activity) ?></td>
@@ -95,7 +109,7 @@
                 <small class="d-block text-center mt-1"><?= $current ?>/<?= $target ?> (<?= $percent ?>%)</small>
               </td>
               <td><?= $lastUpdate ?> WIB</td>
-              <td>
+              <td class="but-inputedit">
                 <a class="btn btn-sm btn-primary" href="<?= base_url('index.php/pegawai/dashboard/' . $r->pegawai_tugas_id) ?>">
                   Input / Edit
                 </a>
@@ -114,9 +128,10 @@
           <a href="?mode=year" class="btn btn-sm <?= ($current_mode ?? 'day') == 'year' ? 'btn-primary' : 'btn-outline-primary' ?>">Tahunan</a>
         </div>
       </div>
-      <div class="col-md-6 text-md-right">
+
+      <div class="col-md-6 d-flex justify-content-md-end">
         <div class="d-inline-flex align-items-center">
-          <label class="small fw-bold text-muted mr-2 mb-0">Tampilkan Grafik:</label>
+          <label class="small fw-bold text-muted me-2 mb-0">Tampilkan Grafik:</label>
           <select id="chartFeatureSelect" class="form-control form-control-sm" style="width: 200px;">
             <option value="fbi" selected>Fee Base Income (FBI)</option>
             <option value="voa">Volume of Agent (VoA)</option>
@@ -126,88 +141,89 @@
         </div>
       </div>
     </div>
+  </div>
 
-    <div class="card shadow-sm border-0 mb-4">
-      <div class="card-header bg-white font-weight-bold">
-        <i class="fas fa-chart-line mr-2 text-primary"></i> Grafik Performa KPI <span id="chartTitle">FBI</span>
-      </div>
-      <div class="card-body">
-        <div style="height: 300px; width: 100%;"><canvas id="mainChart"></canvas></div>
-      </div>
+  <div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-white font-weight-bold">
+      <i class="fas fa-chart-line mr-2 text-primary"></i> Grafik Performa KPI <span id="chartTitle">FBI</span>
     </div>
-
-    <div class="card shadow-sm mb-4 border-0">
-      <div class="card-header bg-light d-flex align-items-center justify-content-between">
-        <div class="font-weight-bold">
-          <i class="fas fa-table mr-2 text-primary"></i>Riwayat Target & Realisasi KPI
-        </div>
-      </div>
-      <div class="table-responsive">
-        <table class="table table-bordered table-sm align-middle mb-0 text-center small">
-          <thead class="thead-light">
-            <tr>
-              <th>Tanggal</th>
-              <th>Kategori</th>
-              <th>Target</th>
-              <th>Realisasi</th>
-              <th>Progress</th>
-              <th>Gap Total</th>
-              <th>Note</th>
-            </tr>
-          </thead>
-          <tbody>
-            <?php if (empty($targets)): ?>
-              <tr>
-                <td colspan="7" class="text-center text-muted py-4">Belum ada data realisasi.</td>
-              </tr>
-            <?php else: ?>
-              <?php foreach ($targets as $t): ?>
-                <?php
-                $m = date('Y-m', strtotime($t->periode));
-                $t_row = $this->db->get_where('kpi_targets', ['DATE_FORMAT(periode, "%Y-%m") =' => $m])->row();
-                $kategori = [
-                  'Transaksi' => ['t' => ($t_row->target_transaksi ?? 0), 'r' => $t->real_transaksi],
-                  'FBI'       => ['t' => ($t_row->target_fbi ?? 0),       'r' => $t->real_fbi],
-                  'VoA'       => ['t' => ($t_row->target_voa ?? 0),       'r' => $t->real_voa],
-                  'Agen'      => ['t' => ($t_row->target_agen ?? 0),      'r' => ($t->real_agen ?? 0)]
-                ];
-                $first = true;
-                foreach ($kategori as $label => $val):
-                  $target = (float)($val['t'] ?? 0);
-                  $real = (float)($val['r'] ?? 0);
-                  $prog = ($target > 0) ? round(($real / $target) * 100, 2) : 0;
-                  $gap = $real - $target;
-                ?>
-                  <tr>
-                    <?php if ($first): ?>
-                      <td rowspan="4" class="font-weight-bold bg-white align-middle"><?= date('d M Y', strtotime($t->periode)) ?></td>
-                    <?php endif; ?>
-                    <td class="text-left pl-3 font-weight-bold bg-light"><?= $label ?></td>
-                    <td class="text-right pr-3"><?= number_format($target, 0, ',', '.') ?></td>
-                    <td class="text-right pr-3"><?= number_format($real, 0, ',', '.') ?></td>
-                    <td><span class="badge badge-<?= ($prog >= 100) ? 'success' : ($prog >= 80 ? 'warning' : 'danger') ?>"><?= $prog ?>%</span></td>
-                    <td class="font-weight-bold <?= ($gap >= 0) ? 'text-success' : 'text-danger' ?>"><?= ($gap >= 0 ? '+' : '') . number_format($gap, 0, ',', '.') ?></td>
-                    <?php if ($first): ?>
-                      <td rowspan="4" class="text-wrap small text-muted align-middle"><?= htmlspecialchars($t->catatan ?? '-') ?></td>
-                    <?php endif; ?>
-                  </tr>
-                <?php $first = false;
-                endforeach; ?>
-              <?php endforeach; ?>
-            <?php endif; ?>
-          </tbody>
-        </table>
-      </div>
-    </div>
-    <div class="card-footer bg-white d-flex justify-content-between align-items-center">
-      <div class="small text-muted">
-        Menampilkan data riwayat KPI.
-      </div>
-      <nav aria-label="Page navigation">
-        <?= $pagination_links ?? '' ?>
-      </nav>
+    <div class="card-body">
+      <div style="height: 300px; width: 100%;"><canvas id="mainChart"></canvas></div>
     </div>
   </div>
+
+  <div class="card shadow-sm mb-4 border-0">
+    <div class="card-header bg-light d-flex align-items-center justify-content-between">
+      <div class="font-weight-bold">
+        <i class="fas fa-table mr-2 text-primary"></i>Riwayat Target & Realisasi KPI
+      </div>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-bordered table-sm align-middle mb-0 text-center table-riwayat">
+        <thead class="thead-light">
+          <tr>
+            <th>Tanggal</th>
+            <th>Kategori</th>
+            <th>Target</th>
+            <th>Realisasi</th>
+            <th>Progress</th>
+            <th>Gap Total</th>
+            <th>Note</th>
+          </tr>
+        </thead>
+        <tbody>
+          <?php if (empty($targets)): ?>
+            <tr>
+              <td colspan="7" class="text-center text-muted py-4">Belum ada data realisasi.</td>
+            </tr>
+          <?php else: ?>
+            <?php foreach ($targets as $t): ?>
+              <?php
+              $m = date('Y-m', strtotime($t->periode));
+              $t_row = $this->db->get_where('kpi_targets', ['DATE_FORMAT(periode, "%Y-%m") =' => $m])->row();
+              $kategori = [
+                'Transaksi' => ['t' => ($t_row->target_transaksi ?? 0), 'r' => $t->real_transaksi],
+                'FBI'       => ['t' => ($t_row->target_fbi ?? 0),       'r' => $t->real_fbi],
+                'VoA'       => ['t' => ($t_row->target_voa ?? 0),       'r' => $t->real_voa],
+                'Agen'      => ['t' => ($t_row->target_agen ?? 0),      'r' => ($t->real_agen ?? 0)]
+              ];
+              $first = true;
+              foreach ($kategori as $label => $val):
+                $target = (float)($val['t'] ?? 0);
+                $real = (float)($val['r'] ?? 0);
+                $prog = ($target > 0) ? round(($real / $target) * 100, 2) : 0;
+                $gap = $real - $target;
+              ?>
+                <tr>
+                  <?php if ($first): ?>
+                    <td rowspan="4" class="font-weight-bold bg-white align-middle"><?= date('d M Y', strtotime($t->periode)) ?></td>
+                  <?php endif; ?>
+                  <td class="text-left pl-3 font-weight-bold bg-light"><?= $label ?></td>
+                  <td class="text-right pr-3"><?= number_format($target, 0, ',', '.') ?></td>
+                  <td class="text-right pr-3"><?= number_format($real, 0, ',', '.') ?></td>
+                  <td><span class="badge badge-<?= ($prog >= 100) ? 'success' : ($prog >= 80 ? 'warning' : 'danger') ?>"><?= $prog ?>%</span></td>
+                  <td class="font-weight-bold <?= ($gap >= 0) ? 'text-success' : 'text-danger' ?>"><?= ($gap >= 0 ? '+' : '') . number_format($gap, 0, ',', '.') ?></td>
+                  <?php if ($first): ?>
+                    <td rowspan="4" class="text-wrap small text-muted align-middle"><?= htmlspecialchars($t->catatan ?? '-') ?></td>
+                  <?php endif; ?>
+                </tr>
+              <?php $first = false;
+              endforeach; ?>
+            <?php endforeach; ?>
+          <?php endif; ?>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="card-footer bg-white d-flex justify-content-between align-items-center">
+    <div class="small text-muted">
+      Menampilkan data riwayat KPI.
+    </div>
+    <nav aria-label="Page navigation">
+      <?= $pagination_links ?? '' ?>
+    </nav>
+  </div>
+</div>
 </div>
 
 
