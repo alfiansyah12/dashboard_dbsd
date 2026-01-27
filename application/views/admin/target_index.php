@@ -185,7 +185,7 @@ $periode_val = $is_edit ? date('Y-m', strtotime($edit->periode)) : '';
   </div>
 </div>
 
-<<div class="row">
+<div class="row">
   <div class="col-md-5">
     <div class="card shadow-sm border-0" style="margin-right: 2px;">
       <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
@@ -273,194 +273,194 @@ $periode_val = $is_edit ? date('Y-m', strtotime($edit->periode)) : '';
       </div>
     </div>
   </div>
+</div>
+
+<!-- Table -->
+<div class="card shadow-sm mb-4 border-0 table-pro">
+  <div class="card-header d-flex align-items-center justify-content-between">
+    <div class="fw-semibold">
+      <i class="fa-solid fa-table me-2 text-primary"></i>Riwayat Target & Realisasi
+    </div>
+    <span class="badge text-bg-primary">Total Periode: <?= isset($targets) ? count($targets) : 0 ?></span>
   </div>
 
-  <!-- Table -->
-  <div class="card shadow-sm mb-4 border-0 table-pro">
-    <div class="card-header d-flex align-items-center justify-content-between">
-      <div class="fw-semibold">
-        <i class="fa-solid fa-table me-2 text-primary"></i>Riwayat Target & Realisasi
-      </div>
-      <span class="badge text-bg-primary">Total Periode: <?= isset($targets) ? count($targets) : 0 ?></span>
-    </div>
+  <div class="table-responsive">
+    <table class="table table-bordered align-middle mb-0 text-center">
+      <thead class="table-light">
+        <tr class="text-nowrap">
+          <th style="width: 140px;">Tanggal</th>
+          <th style="width: 120px;">Kategori</th>
+          <th>Target</th>
+          <th>Realisasi</th>
+          <th>Progress</th>
+          <th>Gap Total</th>
+          <th>Tgl Target Final</th>
+          <th>Note</th>
+          <th style="width: 100px;">Action</th>
+        </tr>
+      </thead>
 
-    <div class="table-responsive">
-      <table class="table table-bordered align-middle mb-0 text-center">
-        <thead class="table-light">
-          <tr class="text-nowrap">
-            <th style="width: 140px;">Tanggal</th>
-            <th style="width: 120px;">Kategori</th>
-            <th>Target</th>
-            <th>Realisasi</th>
-            <th>Progress</th>
-            <th>Gap Total</th>
-            <th>Tgl Target Final</th>
-            <th>Note</th>
-            <th style="width: 100px;">Action</th>
+      <tbody>
+        <?php if (empty($targets)): ?>
+          <tr>
+            <td colspan="9" class="text-center text-muted py-4">Belum ada data realisasi.</td>
           </tr>
-        </thead>
+        <?php else: ?>
+          <?php foreach ($targets as $t): ?>
+            <?php
+            $m = date('Y-m', strtotime($t->periode));
+            // Mencari data target bulanan yang sesuai
+            $t_row = $this->db->get_where('kpi_targets', ['DATE_FORMAT(periode, "%Y-%m") =' => $m])->row();
 
-        <tbody>
-          <?php if (empty($targets)): ?>
-            <tr>
-              <td colspan="9" class="text-center text-muted py-4">Belum ada data realisasi.</td>
-            </tr>
-          <?php else: ?>
-            <?php foreach ($targets as $t): ?>
-              <?php
-              $m = date('Y-m', strtotime($t->periode));
-              // Mencari data target bulanan yang sesuai
-              $t_row = $this->db->get_where('kpi_targets', ['DATE_FORMAT(periode, "%Y-%m") =' => $m])->row();
+            $kategori = [
+              'Transaksi' => ['t' => ($t_row->target_transaksi ?? 0), 'r' => $t->real_transaksi],
+              'FBI'       => ['t' => ($t_row->target_fbi ?? 0),       'r' => $t->real_fbi],
+              'VoA'       => ['t' => ($t_row->target_voa ?? 0),       'r' => $t->real_voa],
+              'Agen'      => ['t' => ($t_row->target_agen ?? 0),      'r' => ($t->real_agen ?? 0)] // Tambahkan Agen
+            ];
 
-              $kategori = [
-                'Transaksi' => ['t' => ($t_row->target_transaksi ?? 0), 'r' => $t->real_transaksi],
-                'FBI'       => ['t' => ($t_row->target_fbi ?? 0),       'r' => $t->real_fbi],
-                'VoA'       => ['t' => ($t_row->target_voa ?? 0),       'r' => $t->real_voa],
-                'Agen'      => ['t' => ($t_row->target_agen ?? 0),      'r' => ($t->real_agen ?? 0)] // Tambahkan Agen
-              ];
-
-              $first = true;
-              foreach ($kategori as $label => $val):
-                $target = (float)($val['t'] ?? 0);
-                $real   = (float)($val['r'] ?? 0);
-                $prog   = ($target > 0) ? round(($real / $target) * 100, 2) : 0;
-                $gap    = $real - $target;
-                $progClass = ($prog >= 100) ? 'success' : ($prog >= 80 ? 'warn' : 'danger');
-              ?>
-                <tr class="text-nowrap">
-                  <?php if ($first): ?>
-                    <td rowspan="4" class="fw-bold bg-white">
-                      <?= date('d M Y', strtotime($t->periode)) ?>
-                      <div class="small fw-normal text-muted mt-1">
-                        <i class="fa-regular fa-clock me-1"></i>
-                        <?= isset($t->created_at) ? date('H:i', strtotime($t->created_at)) : '-' ?> WIB
-                      </div>
-                    </td>
-                  <?php endif; ?>
-
-                  <td class="text-start ps-3 fw-semibold bg-light"><?= $label ?></td>
-                  <td class="text-end pe-3"><?= number_format($target, 0, ',', '.') ?></td>
-                  <td class="text-end pe-3"><?= number_format($real, 0, ',', '.') ?></td>
-                  <td><span class="badge-soft <?= $progClass ?>"><?= $prog ?>%</span></td>
-                  <td class="fw-bold <?= ($gap >= 0) ? 'text-success' : 'text-danger' ?>">
-                    <?= ($gap >= 0 ? '+' : '') . number_format($gap, 0, ',', '.') ?>
+            $first = true;
+            foreach ($kategori as $label => $val):
+              $target = (float)($val['t'] ?? 0);
+              $real   = (float)($val['r'] ?? 0);
+              $prog   = ($target > 0) ? round(($real / $target) * 100, 2) : 0;
+              $gap    = $real - $target;
+              $progClass = ($prog >= 100) ? 'success' : ($prog >= 80 ? 'warn' : 'danger');
+            ?>
+              <tr class="text-nowrap">
+                <?php if ($first): ?>
+                  <td rowspan="4" class="fw-bold bg-white">
+                    <?= date('d M Y', strtotime($t->periode)) ?>
+                    <div class="small fw-normal text-muted mt-1">
+                      <i class="fa-regular fa-clock me-1"></i>
+                      <?= isset($t->created_at) ? date('H:i', strtotime($t->created_at)) : '-' ?> WIB
+                    </div>
                   </td>
+                <?php endif; ?>
 
-                  <?php if ($first): ?>
-                    <td rowspan="4">
-                      <?= (!empty($t_row) && isset($t_row->tgl_target_final)) ? date('d-m-Y', strtotime($t_row->tgl_target_final)) : '-' ?>
-                    </td>
-                    <td rowspan="4" class="text-wrap small text-muted">
-                      <?= htmlspecialchars($t->catatan ?? '-') ?> </td>
-                    <td rowspan="4">
-                      <div class="d-flex flex-column gap-1">
-                        <?php if ($t_row): ?>
-                          <a href="<?= base_url('index.php/admin/target?edit_id=' . (int)$t_row->id) ?>" class="btn btn-sm btn-warning">
-                            <i class="fa-solid fa-pen"></i> Edit Target
-                          </a>
-                        <?php endif; ?>
+                <td class="text-start ps-3 fw-semibold bg-light"><?= $label ?></td>
+                <td class="text-end pe-3"><?= number_format($target, 0, ',', '.') ?></td>
+                <td class="text-end pe-3"><?= number_format($real, 0, ',', '.') ?></td>
+                <td><span class="badge-soft <?= $progClass ?>"><?= $prog ?>%</span></td>
+                <td class="fw-bold <?= ($gap >= 0) ? 'text-success' : 'text-danger' ?>">
+                  <?= ($gap >= 0 ? '+' : '') . number_format($gap, 0, ',', '.') ?>
+                </td>
 
-                        <a href="<?= base_url('index.php/admin/delete_realization/' . (int)$t->id) ?>"
-                          class="btn btn-sm btn-danger"
-                          onclick="return confirm('Hapus realisasi tanggal <?= date('d/m/Y', strtotime($t->periode)) ?>?')">
-                          <i class="fa-solid fa-trash"></i> Delete Real
+                <?php if ($first): ?>
+                  <td rowspan="4">
+                    <?= (!empty($t_row) && isset($t_row->tgl_target_final)) ? date('d-m-Y', strtotime($t_row->tgl_target_final)) : '-' ?>
+                  </td>
+                  <td rowspan="4" class="text-wrap small text-muted">
+                    <?= htmlspecialchars($t->catatan ?? '-') ?> </td>
+                  <td rowspan="4">
+                    <div class="d-flex flex-column gap-1">
+                      <?php if ($t_row): ?>
+                        <a href="<?= base_url('index.php/admin/target?edit_id=' . (int)$t_row->id) ?>" class="btn btn-sm btn-warning">
+                          <i class="fa-solid fa-pen"></i> Edit Target
                         </a>
-                      </div>
-                    </td>
-                  <?php endif; ?>
-                </tr>
-              <?php $first = false;
-              endforeach; ?>
-            <?php endforeach; ?>
-          <?php endif; ?>
-        </tbody>
-      </table>
-    </div>
+                      <?php endif; ?>
+
+                      <a href="<?= base_url('index.php/admin/delete_realization/' . (int)$t->id) ?>"
+                        class="btn btn-sm btn-danger"
+                        onclick="return confirm('Hapus realisasi tanggal <?= date('d/m/Y', strtotime($t->periode)) ?>?')">
+                        <i class="fa-solid fa-trash"></i> Delete Real
+                      </a>
+                    </div>
+                  </td>
+                <?php endif; ?>
+              </tr>
+            <?php $first = false;
+            endforeach; ?>
+          <?php endforeach; ?>
+        <?php endif; ?>
+      </tbody>
     </table>
-    <div class="card-footer bg-white d-flex justify-content-between align-items-center">
-      <div class="small text-muted">
-        Menampilkan <?= count($targets) ?> data terbaru.
-      </div>
-      <nav>
-        <?= $pagination_links ?? '' ?>
-      </nav>
-    </div>
   </div>
+  </table>
+  <div class="card-footer bg-white d-flex justify-content-between align-items-center">
+    <div class="small text-muted">
+      Menampilkan <?= count($targets) ?> data terbaru.
+    </div>
+    <nav>
+      <?= $pagination_links ?? '' ?>
+    </nav>
+  </div>
+</div>
 
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      const labels = <?= $chart_labels ?? '[]' ?>;
-      const allData = {
-        fbi: <?= $c_fbi ?? '{"t":[],"r":[]}' ?>,
-        voa: <?= $c_voa ?? '{"t":[],"r":[]}' ?>,
-        trans: <?= $c_trans ?? '{"t":[],"r":[]}' ?>,
-        agen: <?= $c_agen ?? '{"t":[],"r":[]}' ?>
-      };
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const labels = <?= $chart_labels ?? '[]' ?>;
+    const allData = {
+      fbi: <?= $c_fbi ?? '{"t":[],"r":[]}' ?>,
+      voa: <?= $c_voa ?? '{"t":[],"r":[]}' ?>,
+      trans: <?= $c_trans ?? '{"t":[],"r":[]}' ?>,
+      agen: <?= $c_agen ?? '{"t":[],"r":[]}' ?>
+    };
 
-      if (!labels.length) return;
+    if (!labels.length) return;
 
-      const featureInfo = {
-        fbi: {
-          lbl: 'FBI',
-          col: '#ffc107'
-        },
-        voa: {
-          lbl: 'VoA',
-          col: '#198754'
-        },
-        trans: {
-          lbl: 'Transaksi',
-          col: '#0d6efd'
-        },
-        agen: {
-          lbl: 'Agen',
-          col: '#6f42c1'
-        }
-      };
-      const ctx = document.getElementById('mainChart').getContext('2d');
-      let myChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: labels,
-          datasets: [{
-              label: 'Target',
-              data: allData.fbi.t,
-              borderColor: '#ff0000',
-              backgroundColor: 'rgb(255, 243, 251)',
-              fill: false,
-              tension: 0.3
-            },
-            {
-              label: 'Realisasi FBI',
-              data: allData.fbi.r,
-              backgroundColor: 'rgba(255, 193, 7, 0.2)',
-              borderColor: '#ffc107',
-              fill: true,
-              tension: 0.3
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false
-        }
-      });
+    const featureInfo = {
+      fbi: {
+        lbl: 'FBI',
+        col: '#ffc107'
+      },
+      voa: {
+        lbl: 'VoA',
+        col: '#198754'
+      },
+      trans: {
+        lbl: 'Transaksi',
+        col: '#0d6efd'
+      },
+      agen: {
+        lbl: 'Agen',
+        col: '#6f42c1'
+      }
+    };
+    const ctx = document.getElementById('mainChart').getContext('2d');
+    let myChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [{
+            label: 'Target',
+            data: allData.fbi.t,
+            borderColor: '#ff0000',
+            backgroundColor: 'rgb(255, 243, 251)',
+            fill: false,
+            tension: 0.3
+          },
+          {
+            label: 'Realisasi FBI',
+            data: allData.fbi.r,
+            backgroundColor: 'rgba(255, 193, 7, 0.2)',
+            borderColor: '#ffc107',
+            fill: true,
+            tension: 0.3
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false
+      }
+    });
 
-      document.getElementById('chartFeatureSelect').addEventListener('change', function() {
-        const f = this.value;
-        document.getElementById('chartTitle').innerText = featureInfo[f].lbl;
-        myChart.data.datasets[0].data = allData[f].t;
-        myChart.data.datasets[1].data = allData[f].r;
-        myChart.data.datasets[1].label = 'Realisasi ' + featureInfo[f].lbl;
-        myChart.data.datasets[1].borderColor = featureInfo[f].col;
-        myChart.update();
-      });
+    document.getElementById('chartFeatureSelect').addEventListener('change', function() {
+      const f = this.value;
+      document.getElementById('chartTitle').innerText = featureInfo[f].lbl;
+      myChart.data.datasets[0].data = allData[f].t;
+      myChart.data.datasets[1].data = allData[f].r;
+      myChart.data.datasets[1].label = 'Realisasi ' + featureInfo[f].lbl;
+      myChart.data.datasets[1].borderColor = featureInfo[f].col;
+      myChart.update();
+    });
 
-      document.getElementById('tableFeatureSelect').addEventListener('change', function() {
-        const val = this.value;
-        document.querySelectorAll('#targetTable tbody tr').forEach(tr => {
-          tr.style.display = (val === 'all' || tr.dataset.feature === val) ? '' : 'none';
-        });
+    document.getElementById('tableFeatureSelect').addEventListener('change', function() {
+      const val = this.value;
+      document.querySelectorAll('#targetTable tbody tr').forEach(tr => {
+        tr.style.display = (val === 'all' || tr.dataset.feature === val) ? '' : 'none';
       });
     });
-  </script>
+  });
+</script>

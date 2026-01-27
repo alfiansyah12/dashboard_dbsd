@@ -30,8 +30,8 @@
   <div class="card-body">
 
     <div class="table-responsive">
-      <table class="table table-bordered table-sm mb-0">
-        <thead class="thead-light">
+      <table class="table table-bordered table-hover align-middle mb-0">
+        <thead class="thead-modern">
           <tr>
             <th style="width:18%;">Task</th>
             <th style="width:10%;">Date</th>
@@ -40,78 +40,83 @@
             <th>Pending</th>
             <th>Clear the Path</th>
             <th>Progress</th>
-            <th style="width:12%;">Last Update (WIB)</th>
-            <th style="width:10%;">Action</th>
+            <th style="width:12%;">Last Update</th>
+            <th style="width:8%;" class="text-center">Action</th>
           </tr>
         </thead>
         <tbody>
           <?php if (empty($rows)): ?>
             <tr>
-              <td colspan="9" class="text-center text-muted">No Data Yet</td>
+              <td colspan="9" class="text-center text-muted py-4">No Data Yet</td>
             </tr>
           <?php endif; ?>
 
           <?php foreach ($rows as $r): ?>
             <?php
-            // PINDAHKAN LOGIKA PERHITUNGAN KE SINI
+            // Logika Perhitungan Progress
             $target  = (int)($r->target_nilai ?? 0);
             $current = (int)($r->progress_nilai ?? 0);
             $percent = ($target > 0) ? round(($current / $target) * 100, 0) : 0;
             if ($percent > 100) $percent = 100;
 
-            $activity = !empty($r->activity) ? $r->activity : '-';
+            // Tampilan Teks Kosong
+            $activity = !empty($r->activity) ? htmlspecialchars($r->activity) : '-';
             $pending_display = !empty($r->pending_matters)
               ? htmlspecialchars($r->pending_matters)
-              : '<i class="text-muted small">No pending matters</i>';
+              : '<i class="text-muted small">None</i>';
 
             $path_display = !empty($r->close_the_path)
               ? htmlspecialchars($r->close_the_path)
-              : '<i class="text-muted small">No path to clear</i>';
-            $lastUpdate = '-';
-            $srcTz = new DateTimeZone('Asia/Jakarta'); // WIB
+              : '<i class="text-muted small">None</i>';
 
-            if (!empty($r->updated_at)) {
-              $dt = new DateTime($r->updated_at, $srcTz);
-              $lastUpdate = $dt->format('d-m-Y H:i');
-            } elseif (!empty($r->created_at)) {
-              $dt = new DateTime($r->created_at, $srcTz);
-              $lastUpdate = $dt->format('d-m-Y H:i');
+            // Format Waktu
+            $lastUpdate = '-';
+            if (!empty($r->updated_at) || !empty($r->created_at)) {
+              $raw_date = !empty($r->updated_at) ? $r->updated_at : $r->created_at;
+              $dt = new DateTime($raw_date, new DateTimeZone('Asia/Jakarta'));
+              $lastUpdate = $dt->format('d/m/Y H:i');
             }
             ?>
 
             <tr>
-              <td><?= htmlspecialchars($r->nama_tugas) ?></td>
+              <td class="fw-bold text-dark"><?= htmlspecialchars($r->nama_tugas) ?></td>
               <td><?= date('d/m/Y', strtotime($r->tanggal_ambil)) ?></td>
-              <td class="but-status">
+              <td>
                 <?php
-                $status_class = 'info'; // Default: On Going (Biru)
+                // Perbaikan Badge untuk Bootstrap 5 (Gunakan bg-*)
+                $status_color = 'bg-info'; // Default: ON GOING
                 if ($r->status == 'done') {
-                  $status_class = 'success'; // Hijau
+                  $status_color = 'bg-success';
                 } elseif ($r->status == 'terminated') {
-                  $status_class = 'danger'; // Merah
+                  $status_color = 'bg-danger';
                 }
                 ?>
-                <span class="badge badge-<?= $status_class ?>">
-                  <?= htmlspecialchars(strtoupper($r->status)) ?>
+                <span class="badge <?= $status_color ?> text-uppercase">
+                  <?= htmlspecialchars($r->status) ?>
                 </span>
               </td>
-              <td><?= htmlspecialchars($activity) ?></td>
-
+              <td class="small"><?= $activity ?></td>
               <td class="small"><?= $pending_display ?></td>
               <td class="small"><?= $path_display ?></td>
-
               <td>
-                <div class="progress" style="height: 15px; min-width: 100px;">
-                  <div class="progress-bar <?= ($percent >= 100) ? 'bg-success' : 'bg-info' ?>"
-                    style="width: <?= $percent ?>%;">
+                <div class="progress shadow-sm" style="height: 10px; min-width: 100px; background-color: #e9ecef;">
+                  <div class="progress-bar <?= ($percent >= 100) ? 'bg-success' : 'bg-primary' ?>"
+                    role="progressbar"
+                    style="width: <?= $percent ?>%;"
+                    aria-valuenow="<?= $percent ?>"
+                    aria-valuemin="0"
+                    aria-valuemax="100">
                   </div>
                 </div>
-                <small class="d-block text-center mt-1"><?= $current ?>/<?= $target ?> (<?= $percent ?>%)</small>
+                <small class="d-block text-center mt-1 fw-bold text-dark">
+                  <?= $current ?>/<?= $target ?> (<?= $percent ?>%)
+                </small>
               </td>
-              <td><?= $lastUpdate ?> WIB</td>
-              <td class="but-inputedit">
-                <a class="btn btn-sm btn-primary" href="<?= base_url('index.php/pegawai/dashboard/' . $r->pegawai_tugas_id) ?>">
-                  Input / Edit
+              <td class="small text-muted"><?= $lastUpdate ?> WIB</td>
+              <td class="text-center">
+                <a class="btn btn-sm btn-primary rounded-pill px-3 shadow-sm"
+                  href="<?= base_url('index.php/pegawai/dashboard/' . $r->pegawai_tugas_id) ?>">
+                  <i class="fas fa-edit me-1"></i> Edit
                 </a>
               </td>
             </tr>
@@ -143,19 +148,21 @@
     </div>
   </div>
 
-  <div class="card shadow-sm border-0 mb-4">
-    <div class="card-header bg-white font-weight-bold">
-      <i class="fas fa-chart-line mr-2 text-primary"></i> Grafik Performa KPI <span id="chartTitle">FBI</span>
+  <div class="card shadow-sm border-0 mb-4 overflow-hidden">
+    <div class="card-header bg-white py-3">
+      <h6 class="m-0 font-weight-bold text-primary">
+        <i class="fas fa-chart-area me-2"></i> Grafik Performa KPI <span id="chartTitle" class="text-dark">FBI</span>
+      </h6>
     </div>
     <div class="card-body">
-      <div style="height: 300px; width: 100%;"><canvas id="mainChart"></canvas></div>
+      <div style="height: 350px;"><canvas id="mainChart"></canvas></div>
     </div>
   </div>
 
   <div class="card shadow-sm mb-4 border-0">
     <div class="card-header bg-light d-flex align-items-center justify-content-between">
-      <div class="font-weight-bold">
-        <i class="fas fa-table mr-2 text-primary"></i>Riwayat Target & Realisasi KPI
+      <div class="m-0 font-weight-bold ">
+        <i class="fas fa-table me-2 text-primary"></i><span class="fw-bold">Riwayat Target & Realisasi KPI</span>
       </div>
     </div>
     <div class="table-responsive">
@@ -198,11 +205,11 @@
                   <?php if ($first): ?>
                     <td rowspan="4" class="font-weight-bold bg-white align-middle"><?= date('d M Y', strtotime($t->periode)) ?></td>
                   <?php endif; ?>
-                  <td class="text-left pl-3 font-weight-bold bg-light"><?= $label ?></td>
-                  <td class="text-right pr-3"><?= number_format($target, 0, ',', '.') ?></td>
-                  <td class="text-right pr-3"><?= number_format($real, 0, ',', '.') ?></td>
-                  <td><span class="badge badge-<?= ($prog >= 100) ? 'success' : ($prog >= 80 ? 'warning' : 'danger') ?>"><?= $prog ?>%</span></td>
-                  <td class="font-weight-bold <?= ($gap >= 0) ? 'text-success' : 'text-danger' ?>"><?= ($gap >= 0 ? '+' : '') . number_format($gap, 0, ',', '.') ?></td>
+                  <td class="text-start pl-3 font-weight-bold bg-light"><?= $label ?></td>
+                  <td class="text-numeric text-right pr-3"><?= number_format($target, 0, ',', '.') ?></td>
+                  <td class="text-numeric text-right pr-3"><?= number_format($real, 0, ',', '.') ?></td>
+                  <td><span class="badge rounded-pill bg-<?= ($prog >= 100) ? 'success' : ($prog >= 80 ? 'warning' : 'danger') ?>"><?= $prog ?>%</span></td>
+                  <td class="text-numeric font-weight-bold <?= ($gap >= 0) ? 'text-success' : 'text-danger' ?>"><?= ($gap >= 0 ? '+' : '') . number_format($gap, 0, ',', '.') ?></td>
                   <?php if ($first): ?>
                     <td rowspan="4" class="text-wrap small text-muted align-middle"><?= htmlspecialchars($t->catatan ?? '-') ?></td>
                   <?php endif; ?>

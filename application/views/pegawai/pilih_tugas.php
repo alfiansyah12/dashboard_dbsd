@@ -11,7 +11,7 @@
   <div class="card-body">
     <form method="post" action="<?= base_url('index.php/pegawai/ambil_tugas') ?>">
       <div class="form-group">
-        <label>Task</label>
+        <label style="margin-bottom: 5px; font-size: 18px;">Task</label>
         <select name="tugas_id" class="form-control" required>
           <option value="">-- Choose Task --</option>
           <?php foreach ($tugas as $t): ?>
@@ -22,8 +22,8 @@
         </select>
       </div>
 
-      <button class="btn btn-primary">Take The Assignment</button>
-      <a href="<?= base_url('index.php/pegawai/dashboard') ?>" class="btn btn-secondary">Back</a>
+      <button class="btn btn-primary" style="margin-top: 10px;">Take The Assignment</button>
+      <a href="<?= base_url('index.php/pegawai/dashboard') ?>" class="btn btn-secondary" style="margin-top: 10px;">Back</a>
     </form>
   </div>
 </div>

@@ -23,9 +23,9 @@ class Auth extends CI_Controller
     $this->load->view('auth/login');
   }
 
-  public function login()
+  public function proses_login()
   {
-    // wajib POST
+    // Wajib POST
     if (strtoupper($this->input->method()) !== 'POST') {
       show_error('Method Not Allowed', 405);
       return;
@@ -38,45 +38,34 @@ class Auth extends CI_Controller
     $lastKey = $key . '_last';
     $lastTime = (int) $this->session->userdata($lastKey);
 
-    // reset counter kalau sudah lewat 10 menit
     if ($lastTime && (time() - $lastTime) > 600) {
       $attempt = 0;
       $this->session->unset_userdata([$key, $lastKey]);
     }
 
-    // block jika > 10 kali
     if ($attempt >= 10) {
-      $this->session->set_flashdata('error', 'Terlalu banyak percobaan login. Coba lagi beberapa menit.');
+      $this->session->set_flashdata('error', 'Terlalu banyak percobaan login. Coba lagi nanti.');
       redirect('auth');
       return;
     }
 
-    $email    = trim((string)$this->input->post('email', TRUE));
+    // PERUBAHAN: Ambil 'username' bukan 'email' sesuai name di login.php
+    $username = trim((string)$this->input->post('username', TRUE));
     $password = (string)$this->input->post('password', TRUE);
 
-    if ($email === '' || $password === '') {
+    if ($username === '' || $password === '') {
       $this->_bump_attempt($key, $lastKey);
-      $this->session->set_flashdata('error', 'Email atau password salah.');
+      $this->session->set_flashdata('error', 'Username dan password wajib diisi.');
       redirect('auth');
       return;
     }
 
-    // optional: normalize email
-    $email = strtolower($email);
+    // PERUBAHAN: Gunakan model untuk mencari berdasarkan username/NIP
+    // Pastikan di User_model ada fungsi getByUsername atau sesuaikan namanya
+    $user = $this->User_model->getByUsername($username);
 
-    $user = $this->User_model->getByEmail($email);
-
-    // cek password hash
     if ($user && !empty($user->password) && password_verify($password, $user->password)) {
 
-      // (opsional) upgrade hash kalau algoritma berubah
-      if (password_needs_rehash($user->password, PASSWORD_BCRYPT)) {
-        $newHash = password_hash($password, PASSWORD_BCRYPT);
-        // buat function updatePasswordHash di model kalau belum ada
-        // $this->User_model->updatePasswordHash($user->id, $newHash);
-      }
-
-      // regenerasi session (anti session fixation)
       $this->session->sess_regenerate(TRUE);
 
       $this->session->set_userdata([
@@ -87,18 +76,12 @@ class Auth extends CI_Controller
         'departemen_id' => (int)$user->departemen_id,
       ]);
 
-      // reset rate limit jika sukses
       $this->session->unset_userdata([$key, $lastKey]);
-
-      // optional audit
-      // $this->_audit('LOGIN_SUCCESS', 'email='.$email);
 
       return $this->_redirect_by_role($user->role);
     } else {
       $this->_bump_attempt($key, $lastKey);
-      // optional audit
-      // $this->_audit('LOGIN_FAIL', 'email='.$email);
-      $this->session->set_flashdata('error', 'Email atau password salah.');
+      $this->session->set_flashdata('error', 'Username atau password salah.');
       redirect('auth');
       return;
     }

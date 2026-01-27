@@ -36,4 +36,8 @@ class User_model extends CI_Model
         $this->db->join('departemen', 'departemen.id = users.departemen_id', 'left');
         return $this->db->get()->result();
     }
+    public function getByUsername($username)
+    {
+        return $this->db->get_where('users', ['email' => $username])->row();
+    }
 }

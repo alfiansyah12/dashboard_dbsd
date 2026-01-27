@@ -31,7 +31,7 @@
 }
 
 .nav-link:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(223, 37, 37, 0.1);
     color: #fff !important;
     transform: translateX(5px);
 }
@@ -46,6 +46,7 @@
     width: 25px;
 }
 
+
 /* Responsive Mobile */
 @media (max-width: 767.98px) {
     .sidebar {
@@ -57,9 +58,33 @@
         z-index: 1050;
     }
 }
+.table {
+    border: none !important;
+}
 
-.table td {
-    color: #212529 !important; 
+.table thead th {
+    background-color: #f8fafc !important;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    color: #64748b;
+    border-top: none !important;
+    border-bottom: 2px solid #f1f5f9 !important;
+    padding: 16px !important;
+}
+
+.table tbody td {
+    border-bottom: 1px solid #f1f5f9 !important;
+    padding: 16px !important;
+    vertical-align: middle !important;
+    font-size: 0.95rem;
+    color: #334155;
+}
+
+/* Hover effect pada baris tabel */
+.table tbody tr:hover {
+    background-color: #f1f5f977;
+    transition: 0.2s;
 }
 
 
@@ -68,16 +93,16 @@
     color: #ffffff !important;
 }
 
-/* Perbaikan Progress Bar agar jalurnya terlihat di tabel putih */
 .progress {
-    background-color: #e9ecef !important; /* Warna abu-abu terang untuk track */
-    border: 1px solid #dee2e6;           /* Garis tepi agar lebih tegas */
-    height: 16px !important;
+    height: 8px !important;
+    border-radius: 10px !important;
+    background-color: #e2e8f0 !important;
+    overflow: hidden;
 }
 
-/* Warna isi Progress Bar */
 .progress-bar {
-    background-color: #004776 !important; /* Warna biru gelap */
+    border-radius: 10px !important;
+    background: linear-gradient(90deg, #004776, #007bff) !important;
 }
 
 /* Teks angka di bawah progress bar */
@@ -86,9 +111,10 @@
     font-weight: 600;
 }
 .badge {
-    color: #fff !important; /* Default teks putih */
-    padding: 0.5em 0.75em !important;
+    padding: 6px 14px !important;
+    border-radius: 100px !important;
     font-weight: 600 !important;
+    font-size: 0.7rem !important;
 }
 
 /* Badge Warning (untuk progres 80%) biasanya teksnya gelap agar terbaca */
@@ -171,3 +197,111 @@
 .table-riwayat .small.text-muted {
     font-size: 0.9rem !important;
 }
+
+/* Membuat tabel tanpa border samping agar lebih lega */
+.table-modern {
+    border-collapse: separate;
+    border-spacing: 0 8px; /* Memberi jarak antar baris */
+}
+
+.table-modern thead th {
+    border: none;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    color: #64748b;
+    padding: 12px;
+}   
+
+.text-numeric {
+    text-align: right !important;
+    font-family: 'Courier New', monospace; /* Opsional: font monospaced agar angka sejajar sempurna */
+    padding-right: 20px !important;
+}
+
+/* Gaya Button Icon-Only */
+.btn-circle {
+    width: 35px;
+    height: 35px;
+    padding: 6px 0;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 1.42857;
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #f8fafc; /* Warna background abu sangat muda */
+}
+
+/* Card Modern: Tanpa Border, Bayangan Lembut, Sudut Membulat */
+.card {
+    border: none !important;
+    border-radius: 16px !important;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05) !important;
+    transition: transform 0.3s ease;
+}
+.card-header {
+    background-color: transparent !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+    padding: 20px 24px !important;
+}
+
+.btn-action {
+    width: 38px;
+    height: 38px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    transition: 0.2s;
+}
+
+.table-bordered {
+    border: 1px solid #dee2e6 !important; /* Mengembalikan garis luar tabel */
+}
+
+.table-bordered th,
+.table-bordered td {
+    border: 1px solid #dee2e6 !important; /* Mengembalikan garis sel (kotak-kotak) */
+    padding: 12px 8px !important;
+}
+
+/* Mempertegas garis header */
+.thead-modern th {
+    background-color: #f8fafc !important;
+    border-bottom: 2px solid #004776 !important; /* Garis bawah header lebih tebal warna Biru BTN */
+    color: #333 !important;
+}
+
+/* --- Penegasan Garis Tabel Riwayat KPI --- */
+
+/* Menargetkan khusus tabel dengan class .table-riwayat */
+.table-riwayat.table-bordered {
+    border: 2px solid #cbd5e1 !important; /* Garis luar lebih tebal dan sedikit lebih gelap */
+    border-collapse: collapse !important;
+}
+
+.table-riwayat.table-bordered th,
+.table-riwayat.table-bordered td {
+    /* Menggunakan warna abu-abu kebiruan agar senada dengan tema BTN namun tetap tegas */
+    border: 1.5px solid #cbd5e1 !important; 
+    padding: 12px 10px !important;
+}
+
+/* Memberikan warna latar belakang sedikit berbeda pada header agar garisnya makin kontras */
+.table-riwayat thead th {
+    background-color: #f1f5f9 !important;
+    border-bottom: 3px solid #004776 !important; /* Garis bawah header sangat tegas warna biru */
+    color: #004776 !important;
+    font-weight: 700 !important;
+}
+
+/* Mengatur agar rowspan (kolom Tanggal & Note) tetap memiliki garis yang jelas */
+.table-riwayat td[rowspan] {
+    border-right: 2px solid #cbd5e1 !important;
+    background-color: #ffffff;
+}
+

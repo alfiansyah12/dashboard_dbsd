@@ -145,7 +145,7 @@
           <th>Nama Tugas</th>
           <th>Last Activity</th>
           <th style="width: 180px;">Progress</th>
-          <th>Target</th>
+          <th>Target (Jumlah Aktivitas)</th>
           <th>Deadline</th>
           <th class="text-end">Action</th>
         </tr>

@@ -70,7 +70,7 @@
       <a href="<?= base_url('index.php/auth/logout'); ?>"
         class="nav-link logout"
         onclick="return confirm('Yakin ingin logout?')">
-        <span class="left">
+        <span class="left-logout">
           <i class="fa-solid fa-right-from-bracket"></i> Logout
         </span>
       </a>
